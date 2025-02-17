@@ -1,9 +1,8 @@
 **/__pycache__/
 Data/
 social_2/
-model/
 **/wandb/
-IAFormer/model/checkpoint/
-IAFormer/model/codebook/
+**/model/checkpoint/
+**/model/codebook/
 Social-CH/checkpoint
 
