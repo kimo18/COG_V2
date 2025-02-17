@@ -1,0 +1,7 @@
+**/__pycache__/
+Data/
+social_2/
+model/
+**/wandb/
+
+
