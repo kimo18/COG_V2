@@ -111,12 +111,13 @@ class MultiHeadAttention(nn.Module):
         query = query.view(batch_size * self.num_heads, -1, self.d_model // self.num_heads)
         key = key.view(key.size(0) * self.num_heads, -1, self.d_model // self.num_heads)
         value = value.view(value.size(0) * self.num_heads, -1, self.d_model // self.num_heads)
+        if B != batch_size:
+            # print(B, batch_size,query.shape, key.shape)
+            padding_needed = batch_size* self.num_heads - key.size(0)#* self.num_heads
+            key = F.pad(key, pad=(0, 0, 0, 0, 0, padding_needed))  # pad batch dimension
+            value = F.pad(value, pad=(0, 0, 0, 0, 0, padding_needed))
+            # print(B, batch_size,query.shape, key.shape,padding_needed)
 
-        padding_needed = batch_size* self.num_heads - key.size(0)
-
-        # Pad Key and Value 
-        key = F.pad(key, pad=(0, 0, 0, 0, 0, padding_needed))  # pad batch dimension
-        value = F.pad(value, pad=(0, 0, 0, 0, 0, padding_needed))
         # Calculate attention scores
 
         scores = torch.bmm(query, key.transpose(1, 2))

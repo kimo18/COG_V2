@@ -58,11 +58,11 @@ class IAFormer(nn.Module):
                              num_stage=self.opt.num_stage,
                              node_n=num_kpt)#2
 
-        self.GCNQ2 = GCN.GCN(input_feature=self.mid_feature,
-                             hidden_feature=d_model,
-                             p_dropout=0.3,
-                             num_stage=self.opt.num_stage,
-                             node_n=num_kpt)
+        # self.GCNQ2 = GCN.GCN(input_feature=self.mid_feature,
+        #                      hidden_feature=d_model,
+        #                      p_dropout=0.3,
+        #                      num_stage=self.opt.num_stage,
+        #                      node_n=num_kpt)
 
         self.GCNsQ2 = nn.ModuleList([
            GCN.GCN(input_feature=self.mid_feature,
@@ -134,7 +134,6 @@ class IAFormer(nn.Module):
                 people_feature_all = self.GCNQ1(people_in).unsqueeze(1).clone()
             else:
                 people_feature_all = torch.cat([people_feature_all, self.GCNQ1(people_in).unsqueeze(1).clone()], 1)
-        # print("bye",people_feature_all.shape)
         people_local_feature_all = people_feature_all.clone()
         for k in range(self.k_levels+1):
             # print(f"this is level {k} and this is the  people feature {people_feature_all.shape}")
@@ -186,7 +185,7 @@ class IAFormer(nn.Module):
         loss = self.mix_loss(predic, gt) + self.w_cb * k_loss
 
 
-        if self.dataset == "Mocap" or self.dataset == "CHI3D":
+        if self.dataset == "Mocap" or self.dataset == "CHI3D" or self.dataset == "Wusi":
             return predic, loss
         elif self.dataset == "Human3.6M":
             return predic[:, 0, :, :], loss
@@ -195,15 +194,15 @@ class IAFormer(nn.Module):
 
         gt = gt.transpose(2, 3)
         bs, np, sql, _ = gt.shape
-        spacial_loss_pred = torch.mean(((gt[:, :, self.opt.frame_in:, :]-predic[:, :, self.opt.frame_in:, :])**2).sum(dim=-1))
+        # spacial_loss_pred = torch.mean(((gt[:, :, self.opt.frame_in:, :]-predic[:, :, self.opt.frame_in:, :])**2).sum(dim=-1))
         # torch.mean(torch.norm((predic - gt), dim=3)) 
         
         
         
 
-        # spacial_loss_pred = torch.mean(torch.norm((predic[:, :, self.opt.frame_in:, :] - gt[:, :, self.opt.frame_in:, :]), dim=3))
-        # spacial_loss_ori = torch.mean(((gt[:, :, :self.opt.frame_in, :]-predic[:, :, :self.opt.frame_in, :])**2).sum(dim=-1))
-        spacial_loss = spacial_loss_pred #+ spacial_loss_ori * 0.2
+        spacial_loss_pred = torch.mean(torch.norm((predic[:, :, self.opt.frame_in:, :] - gt[:, :, self.opt.frame_in:, :]), dim=3))
+        spacial_loss_ori = torch.mean(((gt[:, :, :self.opt.frame_in, :]-predic[:, :, :self.opt.frame_in, :])**2).sum(dim=-1))
+        spacial_loss = spacial_loss_pred + spacial_loss_ori * 0.1
 
         temporal_loss = 0
 

@@ -45,7 +45,8 @@ class Options:
                                  help='output frame number used in dataloader')
         self.parser.add_argument('--seq_len', type=int, default=50,
                                  help='frame number each sample')
-
+        self.parser.add_argument('--k_level', type=int, default=3,
+                                 help='frame number each sample')
 
         "---size option of module---"
         self.parser.add_argument('--num_stage', type=int, default=5, help='for GCN')

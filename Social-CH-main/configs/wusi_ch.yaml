@@ -1,6 +1,6 @@
 expname: wusi_ch 
 data: wusi
-epochs: 60
+epochs: 80
 save_freq: 10
 batch_size: 32
 seed: 77

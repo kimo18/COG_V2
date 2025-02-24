@@ -95,7 +95,7 @@ def evaluate(model, test_dataloader, epoch):
             prefix = 'val/frame%d/' % j
             stats[prefix + 'err'] = e1
             stats[prefix + 'err aligned'] = e2
-            stats[prefix + 'err root'] = e3
+            # stats[prefix + 'err root'] = e3
         if epoch >= 0:
             stats['epoch'] = epoch
             wandb.log(stats)
@@ -111,8 +111,8 @@ pprint(args)
 args = EasyDict(args)
 set_random_seed(args.seed)
 
-train_data = '%s/training.npy' % opts.data
-test_data = '%s/testing.npy' % opts.data
+train_data = "../Data/training.npy"
+test_data = "../Data/testing.npy"
 dataset = MPMotion(train_data, concat_last=True)
 test_dataset = MPMotion(test_data, concat_last=True)
 
@@ -131,7 +131,7 @@ if opts.eval:
 
 if opts.train:
     wandb.init(
-            project="Social-CH",
+            project="COG_Transformer_Wusi",
             config=args,
             name=opts.config
     )
@@ -269,16 +269,16 @@ if opts.train:
             optimizer.step()
             losses_sum.update(loss_sum.item(), B)
 
-        stats = {}
-        for k in range(args.k_levels + 1):
-            prefix = 'train/level%d/' % k
-            stats[prefix + 'loss_dis'] = losses_dis[k].avg
-            stats[prefix + 'loss_gail'] = losses_gail[k].avg
-            stats[prefix + 'loss_recon'] = losses_recon[k].avg
-            stats[prefix + 'loss_all'] = losses_all[k].avg
-        stats['train/loss_sum'] = losses_sum.avg
-        stats['epoch'] = epoch
-        wandb.log(stats)
+        # stats = {}
+        # for k in range(args.k_levels + 1):
+        #     prefix = 'train/level%d/' % k
+        #     stats[prefix + 'loss_dis'] = losses_dis[k].avg
+        #     stats[prefix + 'loss_gail'] = losses_gail[k].avg
+        #     stats[prefix + 'loss_recon'] = losses_recon[k].avg
+        #     stats[prefix + 'loss_all'] = losses_all[k].avg
+        # stats['train/loss_sum'] = losses_sum.avg
+        # stats['epoch'] = epoch
+        # wandb.log(stats)
 
         e1, e2, e3 = evaluate(model, test_dataloader, epoch)
         print(e1, e2, e3)

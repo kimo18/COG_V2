@@ -5,9 +5,9 @@ import torch.optim as optim
 import sys
 sys.path.append('..')
 # print(sys.path)
-from tensorboardX import SummaryWriter
+# from tensorboardX import SummaryWriter
 from utils import other_utils as util
-from utils import View_skeleton as view3d
+# from utils import View_skeleton as view3d
 # from IPython import embed
 from tqdm import tqdm
 
@@ -17,19 +17,20 @@ from option.option_Mocap import Options
 from Dataset_tools import Dataset_Mocap as datasets
 from model import IAFormer as model
 
-from torchstat import stat
+# from torchstat import stat
 from collections import OrderedDict
 # import torchvision.models as models
 # os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 # from model import xiao_model_codebook
 
 import os
+import wandb
 
 os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 
 
 
-def main(opt):
+def main(opt,wandb_args):
     torch.manual_seed(1234567890)
     torch.manual_seed(1234567890)   
     torch.cuda.manual_seed(1234567890) 
@@ -47,6 +48,12 @@ def main(opt):
         print('>>> Training dataset length: {:d}'.format(dataset.__len__()))
         data_loader = DataLoader(dataset, batch_size=opt.batch_size, shuffle=True, num_workers=0, pin_memory=True)
         eval_data_loader = DataLoader(eval_dataset, batch_size=opt.batch_size, shuffle=True, num_workers=0, pin_memory=True)
+        wandb.init(
+                project="COG_Transformer_Wusi",
+                config=wandb_args,
+                name="Wusi"
+        )
+
     elif opt.mode == 'test':
         dataset_mode = 1
         print('>>> DATA loading >>>')
@@ -92,40 +99,40 @@ def main(opt):
         optimizer = optim.Adam(filter(lambda x: x.requires_grad, net_pred.parameters()), lr=opt.lr_now)
 
         util.save_ckpt({'epoch': 0, 'lr': lr_now, 'err': 0, 'state_dict': net_pred.state_dict(), 'optimizer': optimizer.state_dict()}, 0, dataset="Mocap",opt=opt)
-        writer = SummaryWriter(opt.tensorboard)
+        # writer = SummaryWriter(opt.tensorboard)
         mpjpe_flag = 10000
 
         for epo in tqdm(range(start_epoch, opt.epoch + 1)):
             ret_train = run_model(nb_kpts, net_pred, opt.batch_size, optimizer, data_loader=data_loader, opt=opt, epo=epo)
-            mpjpe_mean, mpjpe_avg, ape_mean, vim_mean = eval(opt, net_pred, eval_data_loader, nb_kpts, epo)
+            mpjpe_mean, ape_mean = eval(opt, net_pred, eval_data_loader, nb_kpts, epo)
             # exit(0)
-            writer.add_scalar('scalar/train', ret_train['loss_train'], epo)
+            # writer.add_scalar('scalar/train', ret_train['loss_train'], epo)
 
             lr_now = util.lr_decay_mine(optimizer, lr_now, 0.1 ** (1 / 50))
 
-            ret_log = np.array([epo, lr_now, mpjpe_mean])
-            head = np.array(['epoch', 'lr', 'mpjpe_mean'])
-            for k in ret_train.keys():
-                ret_log = np.append(ret_log, [ret_train[k]])
-                head = np.append(head, [k])
-            util.save_csv_log(opt, head, ret_log, is_create=(epo == 1), file_name="train_log")
-            if mpjpe_mean < mpjpe_flag:
-                isbest = True
-                mpjpe_flag = mpjpe_mean
-            else:
-                isbest = False
+            # ret_log = np.array([epo, lr_now, mpjpe_mean])
+            # head = np.array(['epoch', 'lr', 'mpjpe_mean'])
+            # for k in ret_train.keys():
+            #     ret_log = np.append(ret_log, [ret_train[k]])
+            #     head = np.append(head, [k])
+            # # util.save_csv_log(opt, head, ret_log, is_create=(epo == 1), file_name="train_log")
+            # if mpjpe_mean < mpjpe_flag:
+            #     isbest = True
+            #     mpjpe_flag = mpjpe_mean
+            # else:
+            #     isbest = False
 
-            print('epo{}, train error: {:.3f}, mpjpe_mean: {:.3f}, best_mean: {:.3f}, mpjpe_avg: {:.3f}, ape_mean: {:.3f}, vim_mean: {:.3f}  lr: {:.6f}'
-                  .format(epo, ret_train['loss_train'], mpjpe_mean, mpjpe_flag, mpjpe_avg, ape_mean, vim_mean, lr_now))
-            print(opt.ckpt)
+            # print('epo{}, train error: {:.3f}, mpjpe_mean: {:.3f}, best_mean: {:.3f}, mpjpe_avg: {:.3f}, ape_mean: {:.3f}, vim_mean: {:.3f}  lr: {:.6f}'
+            #       .format(epo, ret_train['loss_train'], mpjpe_mean, mpjpe_flag, mpjpe_avg, ape_mean, vim_mean, lr_now))
+            # print(opt.ckpt)
 
-            util.save_ckpt({'epoch': epo,
-                            'lr': lr_now,
-                            'err': ret_train['loss_train'],
-                            'state_dict': net_pred.state_dict(),
-                            'optimizer': optimizer.state_dict()},
-                           epo, dataset="Mocap",opt=opt,Isbest=isbest)
-        writer.close()
+            # util.save_ckpt({'epoch': epo,
+            #                 'lr': lr_now,
+            #                 'err': ret_train['loss_train'],
+            #                 'state_dict': net_pred.state_dict(),
+            #                 'optimizer': optimizer.state_dict()},
+            #                epo, dataset="Mocap",opt=opt,Isbest=isbest)
+        # writer.close()
 
     else: #test
 
@@ -243,7 +250,9 @@ def eval(opt, net_pred, data_loader, nb_kpts, epo):
     ape_joi = np.zeros([5])
     vim_joi = np.zeros([5])
     n = 0
-
+    eval_frame = [5,10,15,20,25]
+    loss_list1={}
+    aligned_loss_list1 = {}
     for batch_idx, (x, y) in enumerate(data_loader): # in_n + kz
         if np.shape(x)[0] < opt.batch_size:
             continue #when only one sample in this batch
@@ -256,6 +265,34 @@ def eval(opt, net_pred, data_loader, nb_kpts, epo):
         data_out, loss = net_pred(x, y)#[:,:,0]  # bz, 2kz, 108
         num_per = y.shape[1]
         data_gt = y.transpose(2, 3)
+        data_gt = data_gt.reshape(opt.batch_size, num_per, opt.seq_len, nb_kpts, 3)
+        data_out = data_out.reshape(opt.batch_size, num_per, opt.seq_len, nb_kpts, 3)
+        for j in eval_frame:
+            mpjpe=torch.sqrt(((data_gt[:,:, opt.frame_in:opt.frame_in+j, :, :] - data_out[:,:, opt.frame_in:opt.frame_in+j, :, :]) ** 2).sum(dim=-1)).mean(dim=-1).mean(dim=-1).mean(dim = -1).sum(dim = -1).cpu().data.numpy().tolist()
+            aligned_loss=torch.sqrt(((data_gt[:,:, opt.frame_in:opt.frame_in+j, :, :] - data_gt[:,:, opt.frame_in:opt.frame_in+j, 0:1, :] - data_out[:,:, opt.frame_in:opt.frame_in+j, :, :] + data_out[:,:, opt.frame_in:opt.frame_in+j, 0:1, :]) ** 2).sum(dim=-1)).mean(dim=-1).mean(dim=-1).mean(dim = -1).sum(dim = -1).cpu().data.numpy().tolist()           
+            # root_loss=torch.sqrt(((prediction_1[:, :j, 0, :] - gt_1[:, :j, 0, :]) ** 2).sum(dim=-1)).mean(dim=-1).mean(dim=-1).cpu().data.numpy().tolist()
+            if j not in loss_list1.keys():
+                loss_list1[j] = mpjpe
+                aligned_loss_list1[j] = aligned_loss
+                # root_loss_list1[j] = []
+            else:        
+                loss_list1[j] += mpjpe
+                aligned_loss_list1[j] += aligned_loss
+            # root_loss_list1[j].append(np.mean(root_loss))
+
+        stats = {}
+        for j in eval_frame:
+            e1, e2 = loss_list1[j]/n*1000, aligned_loss_list1[j]/n*1000
+            prefix = 'val/frame%d/' % j
+            stats[prefix + 'err'] = e1
+            stats[prefix + 'err aligned'] = e2
+            # stats[prefix + 'err root'] = e3
+        if epo >= 0:
+            stats['epoch'] = epo
+            wandb.log(stats)
+        else:
+            pprint(stats)
+        return e1, e2
 
 
         # print(data_out.shape, data_gt.shape)
@@ -336,6 +373,20 @@ def batch_VIM(GT, pred, select_frames):
 
 if __name__ == '__main__':
     option = Options().parse()
-    main(option)
+
+    wandb_args = {"expname" : "IAFormer",
+                "data" : "Wusi",
+                "epochs" : "80",
+                "save_freq": 10,
+                "batch_size": "96",
+                "seed": "1234567890",
+                "k_levels": 3,
+
+                "lr": option.lr_now,
+                "lr_decay": option.lr_decay_rate,
+                "dropout": option.drop_out,
+
+                "d_model": option.d_model}
+    main(option,wandb_args)
 
 

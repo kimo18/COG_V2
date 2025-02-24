@@ -10,13 +10,13 @@ class Datasets(data.Dataset):
         self.process_mode = 'load'
         self.sample_rate = 15
         if mode == 'train':
-            self.data=np.load('../Dataset/Mocap/train_3_75_mocap_umpm.npy')
+            self.data=np.load('../../Data/training.npy')
 
             self.len=len(self.data)
             print(self.data.shape)
         else:
 
-            self.data=np.load('../Dataset/Mocap/test_3_75_mocap_umpm.npy')
+            self.data=np.load('../../Data/testing.npy')
             # self.data=np.load('../Dataset/Crowd/mix1_6persons.npy')
             # self.data=np.load('../Dataset/Crowd/mix2_10persons.npy')
 
@@ -37,6 +37,10 @@ class Datasets(data.Dataset):
         if self.opt.dataset == 'Mocap' and self.opt.seq_len == 75:
             input_seq=self.data[index][:, :self.opt.frame_in, :]  
             output_seq=self.data[index][:, :self.opt.seq_len, :]  
+
+        elif self.opt.dataset == 'Wusi' and self.opt.seq_len == 50:
+            input_seq=self.data[index][:, :self.opt.frame_in, :]  
+            output_seq=self.data[index][:, :self.opt.seq_len, :]
 
         elif self.opt.dataset == 'Mocap' and self.opt.seq_len == 35:
             input_seq=self.new_data[index][:, :self.opt.frame_in, :]

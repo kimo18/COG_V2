@@ -31,110 +31,23 @@ def set_random_seed(seed):
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
 
-# def parse_args():
-#     parser = argparse.ArgumentParser()
-#     parser.add_argument('--config', default='')
-#     parser.add_argument('--train', action='store_true')
-#     parser.add_argument('--eval', action='store_true')
-#     parser.add_argument("--data", type=str, default="data")
-#     parser.add_argument('--ckpt')
-#     return parser.parse_args()
-
-def evaluate(model, test_dataloader, epoch):
-    print('Eval...')
-    eval_frame = [5,10,15,20,25]
-    with torch.no_grad():
-        model.eval()
-        loss_list1={}
-        aligned_loss_list1 = {}
-        root_loss_list1={}
-        for data in tqdm(test_dataloader):
-            input_seq, output_seq = data
-            input_seq=torch.tensor(input_seq,dtype=torch.float32).to(device) 
-            output_seq=torch.tensor(output_seq,dtype=torch.float32).to(device) 
-            n_joints=int(input_seq.shape[-1]/3)
-            use=[input_seq.shape[1]]
-            
-            input_=input_seq.view(-1,50,input_seq.shape[-1])
-            output_=output_seq.view(output_seq.shape[0]*output_seq.shape[1],-1,input_seq.shape[-1])
-            input_ = dct.dct(input_)
-
-            rec_ = model.forward(input_[:,1:50,:]-input_[:,:49,:],dct.idct(input_[:,-1:,:]),input_seq,use)
-            rec = dct.idct(rec_[-1])
-            results = output_[:,:1,:]
-            for i in range(1,26):
-                results = torch.cat([results,output_[:,:1,:]+torch.sum(rec[:,:i,:],dim=1,keepdim=True)],dim=1)
-            results = results[:,1:,:]
-            
-            prediction_1=results[:,:25,:].view(results.shape[0],-1,n_joints,3) 
-            gt_1=output_seq[0][:,1:26,:].view(results.shape[0],-1,n_joints,3)
-
-            for j in eval_frame:
-                mpjpe=torch.sqrt(((gt_1[:, :j, :, :] - prediction_1[:, :j, :, :]) ** 2).sum(dim=-1)).mean(dim=-1).mean(dim=-1).cpu().data.numpy().tolist()
-                aligned_loss=torch.sqrt(((gt_1[:, :j, :, :] - gt_1[:, :j, 0:1, :] - prediction_1[:, :j, :, :] + prediction_1[:, :j, 0:1, :]) ** 2).sum(dim=-1)).mean(dim=-1).mean(dim=-1).cpu().data.numpy().tolist()
-                root_loss=torch.sqrt(((prediction_1[:, :j, 0, :] - gt_1[:, :j, 0, :]) ** 2).sum(dim=-1)).mean(dim=-1).mean(dim=-1).cpu().data.numpy().tolist()
-                if j not in loss_list1.keys():
-                    loss_list1[j] = []
-                    aligned_loss_list1[j] = []
-                    root_loss_list1[j] = []
-                
-                loss_list1[j].append(np.mean(mpjpe))
-                aligned_loss_list1[j].append(np.mean(aligned_loss))
-                root_loss_list1[j].append(np.mean(root_loss))
-            
-            rec=results[:,:,:]
-            rec=rec.reshape(results.shape[0],-1,n_joints,3)
-            
-            input_seq=input_seq.view(results.shape[0],50,n_joints,3)
-            pred=torch.cat([input_seq,rec],dim=1)
-            output_seq=output_seq.view(results.shape[0],-1,n_joints,3)[:,1:,:,:]
-            gt = torch.cat([input_seq,output_seq],dim=1)
-
-            pred = pred[:,:,:,:].cpu().numpy()
-            gt = gt[:,:,:,:].cpu().numpy()
-
-        stats = {}
-        for j in eval_frame:
-            e1, e2, e3 = np.mean(loss_list1[j])*1000, np.mean(aligned_loss_list1[j])*1000, np.mean(root_loss_list1[j])*1000
-            prefix = 'val/frame%d/' % j
-            stats[prefix + 'err'] = e1
-            stats[prefix + 'err aligned'] = e2
-            stats[prefix + 'err root'] = e3
-        if epoch >= 0:
-            stats['epoch'] = epoch
-            wandb.log(stats)
-        else:
-            pprint(stats)
-        return e1, e2, e3
-
-
-
 def main(opt,wandb_args):
 
     # opts = parse_args()
     # with open(opts.config) as f:
     #     args = yaml.load(f, Loader=yaml.Loader)
 
-    # pprint(args)
-    # args = EasyDict(args)
     set_random_seed(opt.seed)
     device = 'cuda'
 
-    # train_data = '../Data/train_3_75_mocap_umpm.npy' 
-    # test_data = '../Data/test_3_75_mocap_umpm.npy' 
     dataset = MPMotion(opt.train_data, concat_last=False)
     test_dataset = MPMotion(opt.test_data, concat_last=False)
 
-
-    # model = Transformer(d_word_vec=args.d_model, d_model=args.d_model, d_inner=args.d_inner_g,
-    #             n_layers=3, n_head=8, d_k=64, d_v=64, k_levels=args.k_levels, share_d=args.share_d, dropout=args.dropout, device=device).to(device)
-
-    # check if you want to add to cuda device
      # Model Intializtion 
 
     nb_kpts = int(dataset.data.shape[3]) #keypoints in 3d (joints number * 3)
     print('>>> MODEL >>>')
-    model = IAFormer(seq_len=opt.seq_len, d_model=opt.d_model, opt=opt, num_kpt=nb_kpts, dataset=opt.dataset, k_levels = 2)
+    model = IAFormer(seq_len=opt.seq_len, d_model=opt.d_model, opt=opt, num_kpt=nb_kpts, dataset=opt.dataset, k_levels = opt.k_level)
     model.cuda()
     lr_now = opt.lr_now
     start_epoch = 1
@@ -156,7 +69,7 @@ def main(opt,wandb_args):
                 name=opt.dataset
         )
         dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batch_size, shuffle=True)
-        test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=1, shuffle=False)
+        test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=opt.batch_size, shuffle=False)
 
         real_ = MPMotion(opt.train_data, in_len=0)
         real_motion_dataloader = torch.utils.data.DataLoader(real_, batch_size=opt.batch_size, shuffle=True)
@@ -196,52 +109,6 @@ def main(opt,wandb_args):
 
             # discriminator.train()
             lr_now = other_utils.lr_decay_mine(optimizer, lr_now, opt.lr_decay_rate)
-            # if model.training:
-            # else:
-            #     print("Model is in evaluation mode")
-
-            # losses_all = []
-            # # losses_dis = []
-            # # losses_gail = []
-            # losses_recon = []
-            # losses_sum = AverageMeter()
-            # for k in range(args.k_levels + 1):
-            #     losses_all.append(AverageMeter())
-            #     losses_dis.append(AverageMeter())
-            #     losses_gail.append(AverageMeter())
-            #     losses_recon.append(AverageMeter())
-
-            
-            # stats = {}
-            # for k in range(args.k_levels + 1):
-            #     prefix = 'train/level%d/' % k
-            #     # stats[prefix + 'loss_dis'] = losses_dis[k].avg
-            #     # stats[prefix + 'loss_gail'] = losses_gail[k].avg
-            #     # stats[prefix + 'loss_recon'] = losses_recon[k].avg
-            #     stats[prefix + 'loss_all'] = losses_all[k].avg
-            # stats['train/loss_sum'] = losses_sum.avg
-            # stats['epoch'] = epoch
-            # wandb.log(stats)
-
-            # e1, e2, e3 = evaluate(model, test_dataloader, epoch)
-            # print(e1, e2, e3)
-            # save_base = f"checkpoint\{args.expname}"
-            # if not os.path.exists(save_base):
-            #     os.mkdir(save_base)
-            # if (epoch+1) % args.save_freq == 0:
-            #     save_path = save_base + f'/{epoch}.pth'
-            #     torch.save(model.state_dict(), save_path)
-            # if e1 < min_error:
-            #     min_error = e1
-            #     save_path = save_base + '/best.pth'
-            #     torch.save(model.state_dict(), save_path)
-            
-            # if args.lr_decay is not None:
-            #     # Decay learning rate exponentially
-            #     for param_group in optimizer.param_groups:
-            #         param_group['lr'] *= args.lr_decay
-            #     for param_group in optimizer_d.param_groups:
-            #         param_group['lr'] *= args.lr_decay
 
 def run_model(nb_kpts, net_pred, batch_size, optimizer=None, data_loader=None, opt=None, epo=0):
 
@@ -370,6 +237,7 @@ def run_model(nb_kpts, net_pred, batch_size, optimizer=None, data_loader=None, o
     return res_dic
 
 def eval(opt, net_pred, data_loader, nb_kpts, epo):
+    print("start eval")
     net_pred.eval()
     # mpjpe_joi = np.zeros([opt.frame_out +1])
     # ape_joi = np.zeros([5])
@@ -379,11 +247,12 @@ def eval(opt, net_pred, data_loader, nb_kpts, epo):
     loss_list1={}
     aligned_loss_list1 = {}
     # root_loss_list1={}
-    for (input_seq, output_seq) in tqdm(data_loader): # in_n + kz
+    for batch_idx, (input_seq, output_seq) in enumerate(data_loader):
+    # for (input_seq, output_seq) in tqdm(data_loader): # in_n + kz
         # if np.shape(input_seq)[0] < opt.batch_size:
         #     continue #when only one sample in this batch
-        # n += opt.batch_size
-
+        # n += 1
+        n += opt.batch_size
         input_seq = input_seq.float().cuda()
         output_seq = output_seq.float().cuda()
 
@@ -399,26 +268,26 @@ def eval(opt, net_pred, data_loader, nb_kpts, epo):
 
 
 
-        # print(data_out.shape, data_gt.shape)
-        data_gt = data_gt.reshape(num_per, opt.seq_len, nb_kpts//3, 3)
-        data_out = data_out.reshape(num_per, opt.seq_len, nb_kpts//3, 3)
+        print(data_out.shape, data_gt.shape)
+        data_gt = data_gt.reshape(opt.batch_size,num_per, opt.seq_len, nb_kpts//3, 3)
+        data_out = data_out.reshape(opt.batch_size,num_per, opt.seq_len, nb_kpts//3, 3)
 
         for j in eval_frame:
-            mpjpe=torch.sqrt(((data_gt[:, opt.frame_in:opt.frame_in+j, :, :] - data_out[:, opt.frame_in:opt.frame_in+j, :, :]) ** 2).sum(dim=-1)).mean(dim=-1).mean(dim=-1).cpu().data.numpy().tolist()
-            aligned_loss=torch.sqrt(((data_gt[:, opt.frame_in:opt.frame_in+j, :, :] - data_gt[:, opt.frame_in:opt.frame_in+j, 0:1, :] - data_out[:, opt.frame_in:opt.frame_in+j, :, :] + data_out[:, opt.frame_in:opt.frame_in+j, 0:1, :]) ** 2).sum(dim=-1)).mean(dim=-1).mean(dim=-1).cpu().data.numpy().tolist()
+            mpjpe=torch.sqrt(((data_gt[:,:, opt.frame_in:opt.frame_in+j, :, :] - data_out[:,:, opt.frame_in:opt.frame_in+j, :, :]) ** 2).sum(dim=-1)).mean(dim=-1).mean(dim=-1).mean(dim = -1).sum(dim = -1).cpu().data.numpy().tolist()
+            aligned_loss=torch.sqrt(((data_gt[:,:, opt.frame_in:opt.frame_in+j, :, :] - data_gt[:,:, opt.frame_in:opt.frame_in+j, 0:1, :] - data_out[:,:, opt.frame_in:opt.frame_in+j, :, :] + data_out[:,:, opt.frame_in:opt.frame_in+j, 0:1, :]) ** 2).sum(dim=-1)).mean(dim=-1).mean(dim=-1).mean(dim = -1).sum(dim = -1).cpu().data.numpy().tolist()           
             # root_loss=torch.sqrt(((prediction_1[:, :j, 0, :] - gt_1[:, :j, 0, :]) ** 2).sum(dim=-1)).mean(dim=-1).mean(dim=-1).cpu().data.numpy().tolist()
             if j not in loss_list1.keys():
-                loss_list1[j] = []
-                aligned_loss_list1[j] = []
+                loss_list1[j] = mpjpe
+                aligned_loss_list1[j] = aligned_loss
                 # root_loss_list1[j] = []
-            
-            loss_list1[j].append(np.mean(mpjpe))
-            aligned_loss_list1[j].append(np.mean(aligned_loss))
+            else:        
+                loss_list1[j] += mpjpe
+                aligned_loss_list1[j] += aligned_loss
             # root_loss_list1[j].append(np.mean(root_loss))
 
         stats = {}
         for j in eval_frame:
-            e1, e2 = np.mean(loss_list1[j])*1000, np.mean(aligned_loss_list1[j])*1000
+            e1, e2 = loss_list1[j]/n*1000, aligned_loss_list1[j]/n*1000
             prefix = 'val/frame%d/' % j
             stats[prefix + 'err'] = e1
             stats[prefix + 'err aligned'] = e2
@@ -497,11 +366,11 @@ if __name__ == '__main__':
                 "save_freq": 10,
                 "batch_size": option.batch_size,
                 "seed": option.seed,
-                "k_levels": 3,
+                "k_levels": option.k_level,
 
                 "lr": option.lr_now,
                 "lr_decay": option.lr_decay_rate,
-                "dropout": option.drop_out,
+                "dropout": option.drop_out, 
 
                 "d_model": option.d_model}
                 # "d_inner_g": 1024,
