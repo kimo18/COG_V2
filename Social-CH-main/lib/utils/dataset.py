@@ -3,7 +3,7 @@ import torch
 import numpy as np
 
 class MPMotion(data.Dataset):
-    def __init__(self, data_path, in_len = 25, max_len = 50, concat_last = False):
+    def __init__(self, data_path, in_len = 50, max_len = 75, concat_last = False):
         self.data = np.load(data_path, allow_pickle=True)
         # N, M, T, J, D = motion_data.shape
         print('Loading data:', data_path, self.data.shape)

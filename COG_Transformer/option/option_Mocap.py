@@ -26,8 +26,8 @@ class Options:
         self.parser.add_argument('--beta', type=int, default=0.5, help='hyperpara in codebook(IKS), degree of iteration')
 
         "---data option---"
-        self.parser.add_argument('--train_data', type=str, default='../Data/training.npy', help='training data location')
-        self.parser.add_argument('--test_data', type=str, default='../Data/testing.npy', help='test data location')
+        self.parser.add_argument('--train_data', type=str, default='../Data/train_3_75_mocap_umpm.npy', help='training data location')
+        self.parser.add_argument('--test_data', type=str, default='../Data/test_3_75_mocap_umpm.npy', help='test data location')
 
         "---hyperpara option---"
         self.parser.add_argument('--seed', type=float, default=1234567890, help='seed generation number')
@@ -39,13 +39,13 @@ class Options:
         self.parser.add_argument('--lr_decay_rate', type=float, default=0.98)
         self.parser.add_argument('--max_norm', type=float, default=10000)
         self.parser.add_argument('--in_features', type=int, default=45, help='dim of input feature, n x j')
-        self.parser.add_argument('--frame_in', type=int, default=25,
+        self.parser.add_argument('--frame_in', type=int, default=50,
                                  help='input frame number used in dataloader')
         self.parser.add_argument('--frame_out', type=int, default=25,
                                  help='output frame number used in dataloader')
-        self.parser.add_argument('--seq_len', type=int, default=50,
+        self.parser.add_argument('--seq_len', type=int, default=75,
                                  help='frame number each sample')
-        self.parser.add_argument('--k_level', type=int, default=3,
+        self.parser.add_argument('--k_level', type=int, default=2,
                                  help='frame number each sample')
 
         "---size option of module---"

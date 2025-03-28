@@ -49,9 +49,9 @@ def main(opt,wandb_args):
         data_loader = DataLoader(dataset, batch_size=opt.batch_size, shuffle=True, num_workers=0, pin_memory=True)
         eval_data_loader = DataLoader(eval_dataset, batch_size=opt.batch_size, shuffle=True, num_workers=0, pin_memory=True)
         wandb.init(
-                project="COG_Transformer_Wusi",
+                project="COG_Transformer",
                 config=wandb_args,
-                name="Wusi"
+                name="IAFormer"
         )
 
     elif opt.mode == 'test':

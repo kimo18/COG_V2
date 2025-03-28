@@ -132,7 +132,7 @@ class GCN(nn.Module):
         self.gcbs = nn.ModuleList(self.gcbs)
 
         self.gc7 = GraphConvolution(hidden_feature, input_feature, node_n=node_n)
-
+        # self.gcout = GraphConvolution(hidden_feature, 26, node_n=node_n)
         self.do = nn.Dropout(p_dropout)
         self.act_f = nn.Tanh()
 
@@ -145,8 +145,11 @@ class GCN(nn.Module):
 
         for i in range(self.num_stage):
             y = self.gcbs[i](y)
+                
         if not is_output:
             y = self.gc7(y)
             y = y + x
-
+        # else :
+        #     y = self.gcout(y)
+        #     y = y+x[:,:,49:]            
         return y

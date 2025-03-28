@@ -30,6 +30,11 @@ def set_random_seed(seed):
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.cuda.set_device(device=0)
+    torch.autograd.set_detect_anomaly(True)
+
+
 
 def main(opt,wandb_args):
 
@@ -64,9 +69,9 @@ def main(opt,wandb_args):
 
     if opt.mode == "train":
         wandb.init(
-                project="COG_Transformer_Wusi",
+                project="COG_Transformer",
                 config=wandb_args,
-                name=opt.dataset
+                name="COG_V3_lvl2_ l1norm (1,0.1,0.5))"
         )
         dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batch_size, shuffle=True)
         test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=opt.batch_size, shuffle=False)
@@ -86,7 +91,7 @@ def main(opt,wandb_args):
         #     {"params": discriminator.parameters(), "lr": args.lr}
         # ]
         # optimizer_d = optim.Adam(params_d)
-        optimizer = optim.Adam(filter(lambda x: x.requires_grad, model.parameters()), lr=opt.lr_now)
+        optimizer = optim.AdamW(filter(lambda x: x.requires_grad, model.parameters()), lr=opt.lr_now,weight_decay=1e-2)
 
         min_error = 100000
 
@@ -270,9 +275,16 @@ def eval(opt, net_pred, data_loader, nb_kpts, epo):
 
         print(data_out.shape, data_gt.shape)
         data_gt = data_gt.reshape(opt.batch_size,num_per, opt.seq_len, nb_kpts//3, 3)
+        #if u want to make predic an output of 25 frames (output frames only)
+        #data_out = data_out.reshape(opt.batch_size,num_per, opt.frame_out, nb_kpts//3, 3)
+        # if predic output is 75 frames 
         data_out = data_out.reshape(opt.batch_size,num_per, opt.seq_len, nb_kpts//3, 3)
-
         for j in eval_frame:
+            #if u want to make predic an output of 25 frames (output frames only)
+            # mpjpe=torch.sqrt(((data_gt[:,:, opt.frame_in:opt.frame_in+j, :, :] - data_out[:,:, :j, :, :]) ** 2).sum(dim=-1)).mean(dim=-1).mean(dim=-1).mean(dim = -1).sum(dim = -1).cpu().data.numpy().tolist()
+            # aligned_loss=torch.sqrt(((data_gt[:,:, opt.frame_in:opt.frame_in+j, :, :] - data_gt[:,:, opt.frame_in:opt.frame_in+j, 0:1, :] - data_out[:,:, :j, :, :] + data_out[:,:, :j, 0:1, :]) ** 2).sum(dim=-1)).mean(dim=-1).mean(dim=-1).mean(dim = -1).sum(dim = -1).cpu().data.numpy().tolist()  
+
+            # if predic output is 75 frames 
             mpjpe=torch.sqrt(((data_gt[:,:, opt.frame_in:opt.frame_in+j, :, :] - data_out[:,:, opt.frame_in:opt.frame_in+j, :, :]) ** 2).sum(dim=-1)).mean(dim=-1).mean(dim=-1).mean(dim = -1).sum(dim = -1).cpu().data.numpy().tolist()
             aligned_loss=torch.sqrt(((data_gt[:,:, opt.frame_in:opt.frame_in+j, :, :] - data_gt[:,:, opt.frame_in:opt.frame_in+j, 0:1, :] - data_out[:,:, opt.frame_in:opt.frame_in+j, :, :] + data_out[:,:, opt.frame_in:opt.frame_in+j, 0:1, :]) ** 2).sum(dim=-1)).mean(dim=-1).mean(dim=-1).mean(dim = -1).sum(dim = -1).cpu().data.numpy().tolist()           
             # root_loss=torch.sqrt(((prediction_1[:, :j, 0, :] - gt_1[:, :j, 0, :]) ** 2).sum(dim=-1)).mean(dim=-1).mean(dim=-1).cpu().data.numpy().tolist()

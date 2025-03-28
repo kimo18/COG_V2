@@ -10,13 +10,13 @@ class Datasets(data.Dataset):
         self.process_mode = 'load'
         self.sample_rate = 15
         if mode == 'train':
-            self.data=np.load('../../Data/training.npy')
+            self.data=np.load('../../Data/train_3_75_mocap_umpm.npy')
 
             self.len=len(self.data)
             print(self.data.shape)
         else:
 
-            self.data=np.load('../../Data/testing.npy')
+            self.data=np.load('../../Data/test_3_75_mocap_umpm.npy')
             # self.data=np.load('../Dataset/Crowd/mix1_6persons.npy')
             # self.data=np.load('../Dataset/Crowd/mix2_10persons.npy')
 

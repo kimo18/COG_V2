@@ -17,6 +17,66 @@ from model.layers import PE
 
 
 
+
+class TemporalAttentionRefinement(nn.Module):
+    def __init__(self, d_model=64, num_heads=4, dropout=0.1):
+        super(TemporalAttentionRefinement, self).__init__()
+        # Temporal self-attention
+        self.attention = nn.MultiheadAttention(embed_dim=d_model, num_heads=num_heads, dropout=dropout, batch_first=True)
+        
+        # MLP-based feature transformation
+        self.mlp = nn.Sequential(
+            nn.Linear(d_model, d_model * 2),
+            nn.ReLU(),
+            nn.Linear(d_model * 2, d_model)
+        )
+
+        # Layer normalization
+        self.norm1 = nn.LayerNorm(d_model)
+        self.norm2 = nn.LayerNorm(d_model)
+
+        # Residual connection for refinement
+        self.residual_weight = nn.Parameter(torch.ones(1))
+
+    def forward(self, pred):
+        """
+        pred: Tensor of shape [batch_size, num_person, seq_len, num_kpt]
+        """
+
+        # print(pred.shape)
+        bs,num_person,num_kpt,seq_len = pred.shape
+        # pred = pred.transpose(2, 3)
+        refined_output = torch.empty(bs,num_person,seq_len, num_kpt)
+        for i in range(bs):
+            persons = pred[i,:,:,:].clone().detach() 
+        # print(bs, num_person, seq_len, num_kpt)
+        # Reshape to [batch_size * num_person, seq_len, num_kpt]
+        
+
+        # Apply Layer Norm before attention
+            persons = self.norm1(persons)
+
+            # Temporal attention
+            refined, _ = self.attention(persons, persons, persons)
+
+            # Residual Connection + MLP Transformation
+            refined = refined + self.mlp(self.norm2(refined))
+
+            # Residual weight scaling
+            refined = pred[i,:,:,:]+ self.residual_weight * refined
+            
+            if i == 0:
+                refined_output = refined.unsqueeze(0).clone()
+            else:
+                refined_output = torch.cat([refined_output, refined.unsqueeze(0).clone()], 0)
+            # Reshape back to original shape
+            # refined = refined.transpose(2, 3)
+
+        return refined_output
+
+
+
+
 class IAFormer(nn.Module):
     def __init__(self, seq_len, opt, num_kpt,dataset, src_pad_idx=1, trg_pad_idx=1,
             d_word_vec=64, d_model=64, d_inner=512,
@@ -83,9 +143,10 @@ class IAFormer(nn.Module):
         self.CP = CP.CP(self.opt)
 
         self.PE = PE.PositionalEmbedding(opt=self.opt, mid_feature=self.mid_feature, embed_size=opt.batch_size)
-        
+        self.refinement = TemporalAttentionRefinement(d_model=opt.seq_len, num_heads=3, dropout=0.1)
         self.k_levels = k_levels
-        
+        # self.pooling = nn.AdaptiveAvgPool1d(25)
+        # self.final_projection = nn.Linear(opt.seq_len, opt.frame_out)
         # if share_d:
         #     depth = 2
 
@@ -136,6 +197,17 @@ class IAFormer(nn.Module):
                 people_feature_all = torch.cat([people_feature_all, self.GCNQ1(people_in).unsqueeze(1).clone()], 1)
         people_local_feature_all = people_feature_all.clone()
         for k in range(self.k_levels+1):
+
+            # for i in range(num_person):
+            #     people_in = input[:, i, :, :].clone().detach()
+            #     if i == 0:
+            #         people_feature_all = self.GCNQ1(people_in).unsqueeze(1).clone()
+            #     else:
+            #         people_feature_all = torch.cat([people_feature_all, self.GCNQ1(people_in).unsqueeze(1).clone()], 1)
+            # if k == 0:
+            #     people_local_feature_all = people_feature_all.clone()
+
+
             # print(f"this is level {k} and this is the  people feature {people_feature_all.shape}")
             for bat_idx in range(input.shape[0]):
                 itw = LP.Trajectory_Weight(self.opt, input_ori[bat_idx])
@@ -163,28 +235,49 @@ class IAFormer(nn.Module):
                 feature_att += people_feature.clone()
 
                 # print("this is the size of feature attention", feature_att.shape)
+                # print(feature_att.shape)
                 GCNQ2 = self.GCNsQ2[k]
                 feature = GCNQ2(feature_att)
+                # print("this  is the shape of feature",feature.shape)
 
                 # feature = self.GCNQ2(feature_att)
+                #feature = self.pooling(feature) 
+                # feature = self.final_projection(feature)
+                # if k == self.k_levels :
+                #     refined_pred = self.refinement(feature)
+                #     feature = torch.matmul(self.idct, refined_pred)
+                #     feature = feature.transpose(1, 2)
 
-                if k == self.k_levels :
-                    feature = torch.matmul(self.idct, feature)
-                    feature = feature.transpose(1, 2)
+                # print(feature.shape)    
                 if i == 0:
                     predic = feature.unsqueeze(1).clone()
                 else:
                     predic = torch.cat([predic, feature.unsqueeze(1).clone()], 1)
+            # people_feature_all = predic.clone().detach()
             people_feature_all = predic.clone().detach()
+
             if k < self.k_levels:
+                # if u want to make predic an output of 25 frames (output frames only)
+                # input = torch.cat([input[:,:,:,:49], predic], 3)
+                # input_ori = torch.cat([input[:,:,:,:49], torch.matmul(self.idct, predic).clone().detach()], 3)
+                
+                # if predic output is 75 frames 
+                # input = predic
                 input_ori = torch.matmul(self.idct, predic).clone().detach()
         # print("hi",predic.shape)
         # print(f"this is the predic shape {predic.shape}")
         # print(f"this is the gt shape {gt.shape}")
 
+        # print(predic.shape)
+        predic = torch.matmul(self.idct, predic)
+        predic = self.refinement(predic)
+        predic = predic.transpose(2, 3)
+
+
         loss = self.mix_loss(predic, gt) + self.w_cb * k_loss
 
-
+        # predic = predic[:,:,1:,:]
+        # print(predic.shape)
         if self.dataset == "Mocap" or self.dataset == "CHI3D" or self.dataset == "Wusi":
             return predic, loss
         elif self.dataset == "Human3.6M":
@@ -200,9 +293,12 @@ class IAFormer(nn.Module):
         
         
 
+        # spacial_loss_pred = torch.mean((torch.norm((predic[:, :, 1:, :] - gt[:, :, self.opt.frame_in:, :]))))
         spacial_loss_pred = torch.mean(torch.norm((predic[:, :, self.opt.frame_in:, :] - gt[:, :, self.opt.frame_in:, :]), dim=3))
+        physics_loss_pred = self.physics_loss(predic, gt)
+        # recon_loss = nn.functional.l1_loss(predic[:, :,0,:], gt[:, :, 49, :])
         spacial_loss_ori = torch.mean(((gt[:, :, :self.opt.frame_in, :]-predic[:, :, :self.opt.frame_in, :])**2).sum(dim=-1))
-        spacial_loss = spacial_loss_pred + spacial_loss_ori * 0.1
+        spacial_loss =  (spacial_loss_pred) + (spacial_loss_ori * 0.1) +(physics_loss_pred* 0.5) #recon_loss* 0.1 
 
         temporal_loss = 0
 
@@ -220,6 +316,19 @@ class IAFormer(nn.Module):
         return loss
 
 
+    def physics_loss(self,pred, gt):
+        """Enforce smooth movement by constraining velocity and acceleration."""
+        velocity_pred = pred[:,:, 1:,:] - pred[:,:, :-1,:]  # Velocity = ΔPosition
+        velocity_gt = gt[:,:, 1:,:] - gt[:,:, :-1,:]
+        acceleration_pred = velocity_pred[:,:, 1:,:] - velocity_pred[:,:, :-1,:]  # Acceleration = ΔVelocity
+        acceleration_gt = velocity_gt[:,:, 1:,:] - velocity_gt[:,:, :-1,:]
+
+        velocity_loss = torch.mean((velocity_pred - velocity_gt) ** 2)
+        acceleration_loss = torch.mean((acceleration_pred - acceleration_gt) ** 2)
+
+        return velocity_loss #+ 0.1 * acceleration_loss  # Weight acceleration loss less to avoid oversmoothing
+    
+    
     def get_dct_matrix(self, N):
         # Computes the discrete cosine transform (DCT) matrix and its inverse (IDCT)
         dct_m = np.eye(N)

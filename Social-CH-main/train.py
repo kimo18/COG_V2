@@ -16,7 +16,7 @@ from easydict import EasyDict
 from tqdm import tqdm
 from lib.utils.dataset import MPMotion
 
-import ipdb
+# import ipdb
 import argparse
 import wandb
 import random
@@ -51,11 +51,11 @@ def evaluate(model, test_dataloader, epoch):
             n_joints=int(input_seq.shape[-1]/3)
             use=[input_seq.shape[1]]
             
-            input_=input_seq.view(-1,25,input_seq.shape[-1])
+            input_=input_seq.view(-1,50,input_seq.shape[-1])
             output_=output_seq.view(output_seq.shape[0]*output_seq.shape[1],-1,input_seq.shape[-1])
             input_ = dct.dct(input_)
 
-            rec_ = model.forward(input_[:,1:25,:]-input_[:,:24,:],dct.idct(input_[:,-1:,:]),input_seq,use)
+            rec_ = model.forward(input_[:,1:50,:]-input_[:,:49,:],dct.idct(input_[:,-1:,:]),input_seq,use)
             rec = dct.idct(rec_[-1])
             results = output_[:,:1,:]
             for i in range(1,26):
@@ -81,7 +81,7 @@ def evaluate(model, test_dataloader, epoch):
             rec=results[:,:,:]
             rec=rec.reshape(results.shape[0],-1,n_joints,3)
             
-            input_seq=input_seq.view(results.shape[0],25,n_joints,3)
+            input_seq=input_seq.view(results.shape[0],50,n_joints,3)
             pred=torch.cat([input_seq,rec],dim=1)
             output_seq=output_seq.view(results.shape[0],-1,n_joints,3)[:,1:,:,:]
             gt = torch.cat([input_seq,output_seq],dim=1)
@@ -111,8 +111,8 @@ pprint(args)
 args = EasyDict(args)
 set_random_seed(args.seed)
 
-train_data = "../Data/training.npy"
-test_data = "../Data/testing.npy"
+train_data = "../Data/train_3_75_mocap_umpm.npy"
+test_data = "../Data/test_3_75_mocap_umpm.npy"
 dataset = MPMotion(train_data, concat_last=True)
 test_dataset = MPMotion(test_data, concat_last=True)
 
@@ -131,9 +131,9 @@ if opts.eval:
 
 if opts.train:
     wandb.init(
-            project="COG_Transformer_Wusi",
+            project="COG_Transformer",
             config=args,
-            name=opts.config
+            name="Social-CH lvl 3"
     )
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size, shuffle=True)
     
@@ -185,11 +185,11 @@ if opts.train:
 
             input_seq = torch.tensor(input_seq,dtype=torch.float32).to(device) 
             output_seq = torch.tensor(output_seq,dtype=torch.float32).to(device) 
-            input_ = input_seq.view(-1,25,input_seq.shape[-1]) 
+            input_ = input_seq.view(-1,50,input_seq.shape[-1]) 
             output_ = output_seq.view(output_seq.shape[0]*output_seq.shape[1],-1, input_seq.shape[-1])
             
             input_dct = dct.dct(input_)
-            rec_ = model.forward(input_dct[:,1:25,:]-input_dct[:,:24,:], dct.idct(input_dct[:,-1:,:]), input_seq, use) 
+            rec_ = model.forward(input_dct[:,1:50,:]-input_dct[:,:49,:], dct.idct(input_dct[:,-1:,:]), input_seq, use) 
 
             loss_sum = torch.tensor(0).to(device)
             loss_dis_sum = torch.tensor(0).to(device)
@@ -282,16 +282,16 @@ if opts.train:
 
         e1, e2, e3 = evaluate(model, test_dataloader, epoch)
         print(e1, e2, e3)
-        save_base = 'checkpoint/' + args.expname
-        if not os.path.exists(save_base):
-            os.mkdir(save_base)
-        if (epoch+1) % args.save_freq == 0:
-            save_path = save_base + f'/{epoch}.pth'
-            torch.save(model.state_dict(), save_path)
-        if e1 < min_error:
-            min_error = e1
-            save_path = save_base + '/best.pth'
-            torch.save(model.state_dict(), save_path)
+        # save_base = 'checkpoint/' + args.expname
+        # if not os.path.exists(save_base):
+        #     os.mkdir(save_base)
+        # if (epoch+1) % args.save_freq == 0:
+        #     save_path = save_base + f'/{epoch}.pth'
+        #     torch.save(model.state_dict(), save_path)
+        # if e1 < min_error:
+        #     min_error = e1
+        #     save_path = save_base + '/best.pth'
+        #     torch.save(model.state_dict(), save_path)
         
         if args.lr_decay is not None:
             # Decay learning rate exponentially
