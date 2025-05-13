@@ -14,7 +14,7 @@ class Options:
         """
 
         "---basic option---"
-        self.parser.add_argument('--dataset', type=str, default='Mocap', help='used dataset name')
+        self.parser.add_argument('--dataset', type=str, default='Wusi', help='used dataset name')
         self.parser.add_argument('--ckpt', type=str, default='../model/checkpoint', help='path of checkpoint')
         self.parser.add_argument('--tensorboard', type=str, default='../model/tensorboard/', help='path to save tensorboard log')
         self.parser.add_argument('--model', type=str, default='IAFormer', help='model type used')
@@ -45,7 +45,7 @@ class Options:
                                  help='output frame number used in dataloader')
         self.parser.add_argument('--seq_len', type=int, default=75,
                                  help='frame number each sample')
-        self.parser.add_argument('--k_level', type=int, default=2,
+        self.parser.add_argument('--k_level', type=int, default=1,
                                  help='frame number each sample')
 
         "---size option of module---"
@@ -58,7 +58,7 @@ class Options:
         # self.parser.add_argument('--mode', type=str, default='test', help='mode of execute')
         self.parser.add_argument('--test_epoch', type=int, default=None,
                                  help='check the model with corresponding epoch')
-        self.parser.add_argument('--save_results', type=bool, default=1,
+        self.parser.add_argument('--save_results', type=bool, default=3,
                                  help='whether to save result')
         
 

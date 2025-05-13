@@ -14,77 +14,15 @@ from model.layers import IPM_ITW as LP
 from model.layers import IPLM as CP
 
 from model.layers import PE
+from utils import loss_functions as WL
 
-
-
-
-class TemporalAttentionRefinement(nn.Module):
-    def __init__(self, d_model=64, num_heads=4, dropout=0.1):
-        super(TemporalAttentionRefinement, self).__init__()
-        # Temporal self-attention
-        self.attention = nn.MultiheadAttention(embed_dim=d_model, num_heads=num_heads, dropout=dropout, batch_first=True)
-        
-        # MLP-based feature transformation
-        self.mlp = nn.Sequential(
-            nn.Linear(d_model, d_model * 2),
-            nn.ReLU(),
-            nn.Linear(d_model * 2, d_model)
-        )
-
-        # Layer normalization
-        self.norm1 = nn.LayerNorm(d_model)
-        self.norm2 = nn.LayerNorm(d_model)
-
-        # Residual connection for refinement
-        self.residual_weight = nn.Parameter(torch.ones(1))
-
-    def forward(self, pred):
-        """
-        pred: Tensor of shape [batch_size, num_person, seq_len, num_kpt]
-        """
-
-        # print(pred.shape)
-        bs,num_person,num_kpt,seq_len = pred.shape
-        # pred = pred.transpose(2, 3)
-        refined_output = torch.empty(bs,num_person,seq_len, num_kpt)
-        for i in range(bs):
-            persons = pred[i,:,:,:].clone().detach() 
-        # print(bs, num_person, seq_len, num_kpt)
-        # Reshape to [batch_size * num_person, seq_len, num_kpt]
-        
-
-        # Apply Layer Norm before attention
-            persons = self.norm1(persons)
-
-            # Temporal attention
-            refined, _ = self.attention(persons, persons, persons)
-
-            # Residual Connection + MLP Transformation
-            refined = refined + self.mlp(self.norm2(refined))
-
-            # Residual weight scaling
-            refined = pred[i,:,:,:]+ self.residual_weight * refined
-            
-            if i == 0:
-                refined_output = refined.unsqueeze(0).clone()
-            else:
-                refined_output = torch.cat([refined_output, refined.unsqueeze(0).clone()], 0)
-            # Reshape back to original shape
-            # refined = refined.transpose(2, 3)
-
-        return refined_output
-
-
-
-
+kofta = False
+mode = "adaptive"
 class IAFormer(nn.Module):
-    def __init__(self, seq_len, opt, num_kpt,dataset, src_pad_idx=1, trg_pad_idx=1,
-            d_word_vec=64, d_model=64, d_inner=512,
-            n_layers=3, n_head=8, d_k=32, d_v=32, dropout=0.2, n_position=100,
-            k_levels=3, share_d=False, device = "cuda"):
+    def __init__(self, seq_len, d_model, opt, num_kpt, dataset, k_levels = 3 , share_d = False):
         super(IAFormer, self).__init__()
         self.opt = opt
-        self.device = device
+
         self.mid_feature = opt.seq_len
         self.dataset = dataset
         self.seq_len = seq_len
@@ -99,12 +37,7 @@ class IAFormer(nn.Module):
             self.w_sp = 1
             self.w_tp = 1
             self.w_cb = 1
-        if share_d:
-            depth = 2
 
-        else:
-            depth = k_levels + 1
-        
         self.Att = Att.TransformerDecoder(num_layers=self.opt.num_layers,
                                           num_heads=5,
                                           d_model=self.mid_feature,
@@ -117,7 +50,11 @@ class IAFormer(nn.Module):
                              p_dropout=0.3,
                              num_stage=self.opt.num_stage,
                              node_n=num_kpt)#2
+        if share_d:
+            self.k_levels = 2
 
+        else:
+            self.k_levels = k_levels + 1
         # self.GCNQ2 = GCN.GCN(input_feature=self.mid_feature,
         #                      hidden_feature=d_model,
         #                      p_dropout=0.3,
@@ -130,8 +67,7 @@ class IAFormer(nn.Module):
                              p_dropout=0.3,
                              num_stage=self.opt.num_stage,
                              node_n=num_kpt)
-            for i in range(depth)])
-
+            for i in range(self.k_levels)])
         self.IP = IP.IP(opt=self.opt, dim_in=self.mid_feature,
                         mid_feature=self.mid_feature, num_axis=num_kpt, dropout=0.1)
 
@@ -143,143 +79,202 @@ class IAFormer(nn.Module):
         self.CP = CP.CP(self.opt)
 
         self.PE = PE.PositionalEmbedding(opt=self.opt, mid_feature=self.mid_feature, embed_size=opt.batch_size)
-        self.refinement = TemporalAttentionRefinement(d_model=opt.seq_len, num_heads=3, dropout=0.1)
-        self.k_levels = k_levels
-        # self.pooling = nn.AdaptiveAvgPool1d(25)
-        # self.final_projection = nn.Linear(opt.seq_len, opt.frame_out)
-        # if share_d:
-        #     depth = 2
+        # self.attention_mlp = nn.Sequential(
+        #     nn.Linear(self.k_levels, 64),
+        #     nn.ReLU(),
+        #     nn.Dropout(p=0.1),
+        #     nn.Linear(64, self.k_levels)
+        # )
 
-        # else:
-        #     depth = k_levels + 1
+        self.attention_mlp = nn.Sequential(
+            nn.Linear(self.k_levels, 128),
+            nn.LayerNorm(128),             # Normalizes across features
+            nn.ReLU(),
+            nn.Dropout(0.3),            # Helps avoid overconfidence
 
-        # self.decoders = nn.ModuleList([
-        #     Att.Decoder(
-        #     n_position=n_position,
-        #     d_word_vec=d_word_vec, d_model=d_model, d_inner=d_inner,
-        #     n_layers=n_layers, n_head=n_head, d_k=d_k, d_v=d_v,
-        #     pad_idx=trg_pad_idx, dropout=dropout, device=self.device)
-        #     for i in range(depth)])
+            nn.Linear(128, 64),
+            nn.ReLU(),
+            nn.Dropout(0.3),
 
-        # self.l1s = nn.ModuleList([
-        #     nn.Linear(d_model, d_model*4)
-        #     for i in range(depth)])
-
-        # self.l2s = nn.ModuleList([
-        #     nn.Linear(d_model*4, d_model*25)
-        #     for i in range(depth)])
-        
-        # self.projs = nn.ModuleList([
-        #     nn.Linear(d_model, 45)
-        #     for i in range(depth)])
+            nn.Linear(64, self.k_levels)         # Final logits over K levels
+        )
+        # self.error_predictor = nn.Sequential(
+        #     nn.Linear(input_dim + output_dim, 64),
+        #     nn.ReLU(),
+        #     nn.Linear(64, output_dim)
+        # )
+        #self.linear = nn.Linear(num_kpt * self.k_levels, num_kpt)
         
 
-    def forward(self, input_ori, gt):
-
-        # input_ori = input_ori.permute(0, 1, 3, 2)
+    def forward(self, input_ori, gt, epoch):  
+        results = []
+        results_feat = []
         input = torch.matmul(self.dct, input_ori)
-
-        if self.dataset == "Mocap" or self.dataset == "CHI3D" or self.dataset == "Wusi":
+        
+        if self.dataset == "Mocap" or self.dataset == "CHI3D":
             input = input
-        elif self.dataset == "Human3.6M": # lets account for the 1 person in the scene and have same tensor shap
+        elif self.dataset == "Human3.6M":
             input = input.unsqueeze(dim=1)
             input_ori = input_ori.unsqueeze(dim=1)
             gt = gt.unsqueeze(dim=1)
 
         num_person = np.shape(input)[1]
+
+
         for i in range(num_person):
-
             people_in = input[:, i, :, :].clone().detach()
-
             if i == 0:
                 people_feature_all = self.GCNQ1(people_in).unsqueeze(1).clone()
             else:
                 people_feature_all = torch.cat([people_feature_all, self.GCNQ1(people_in).unsqueeze(1).clone()], 1)
-        people_local_feature_all = people_feature_all.clone()
-        for k in range(self.k_levels+1):
-
-            # for i in range(num_person):
-            #     people_in = input[:, i, :, :].clone().detach()
-            #     if i == 0:
-            #         people_feature_all = self.GCNQ1(people_in).unsqueeze(1).clone()
-            #     else:
-            #         people_feature_all = torch.cat([people_feature_all, self.GCNQ1(people_in).unsqueeze(1).clone()], 1)
-            # if k == 0:
-            #     people_local_feature_all = people_feature_all.clone()
 
 
-            # print(f"this is level {k} and this is the  people feature {people_feature_all.shape}")
-            for bat_idx in range(input.shape[0]):
-                itw = LP.Trajectory_Weight(self.opt, input_ori[bat_idx])
+        for bat_idx in range(self.opt.batch_size):
+            itw = LP.Trajectory_Weight(self.opt, input_ori[bat_idx])
+            if bat_idx == 0:
+                bat_itw = itw.unsqueeze(0)
+            else:
+                bat_itw = torch.cat([bat_itw, itw.unsqueeze(0)], 0)
+
+
+        IP_score = self.IP(people_feature_all.clone(), input_ori.clone(), num_person, bat_itw, self.AP)
+
+        CP_score, k_loss, CP_ema = self.CP(IP_score.clone())
+        IP_feature = IP_score
+        CP_ema = CP_ema * CP_score
+
+
+        for i in range(num_person):
+
+            people_feature = people_feature_all[:, i, :, :]
+            
+            filter_feature = people_feature.clone().detach()
+
+            Pe = self.PE.forward(idx=i)
+            feature_att = self.Att(filter_feature, IP_feature, memo2=CP_ema, embedding=Pe)
+            feature_att += people_feature.clone()           
+            GCN_decoder = self.GCNsQ2[0]
+            feature = GCN_decoder(feature_att)
+                
+
+            if i == 0:
+                level_Features = feature_att.unsqueeze(1).clone()       
+                dct = feature.unsqueeze(1).clone()
+                feature = torch.matmul(self.idct, feature)
+                feature = feature.transpose(1, 2)
+                predic = feature.unsqueeze(1).clone()
+            else:
+                level_Features = torch.cat([level_Features, feature_att.unsqueeze(1).clone()], 1)
+                dct = torch.cat([dct, feature.unsqueeze(1).clone()], 1)
+                feature = torch.matmul(self.idct, feature)
+                feature = feature.transpose(1, 2)
+                predic = torch.cat([predic, feature.unsqueeze(1).clone()], 1)
+        results_feat.append(level_Features)        
+        results.append(predic.clone())
+
+        for k in range(1,self.k_levels):
+            for bat_idx in range(self.opt.batch_size):
+                itw = LP.Trajectory_Weight(self.opt, predic.transpose(2,3)[bat_idx])
                 if bat_idx == 0:
                     bat_itw = itw.unsqueeze(0)
                 else:
                     bat_itw = torch.cat([bat_itw, itw.unsqueeze(0)], 0)
-
-
-            IP_score = self.IP(people_feature_all.clone(), input_ori.clone(), num_person, bat_itw, self.AP)
-
-            CP_score, k_loss, CP_ema = self.CP(IP_score.clone())
-            IP_feature = IP_score
-            CP_ema = CP_ema * CP_score
-
-
+            IP_score = self.IP(dct.clone(), (predic.clone()).transpose(2,3), num_person, bat_itw, self.AP) # input ori can be the predic from last , so we get 
             for i in range(num_person):
-
-                people_feature = people_local_feature_all[:, i, :, :]
-                
+                people_feature = people_feature_all[:, i, :, :]#dct[:, i, :, :]
                 filter_feature = people_feature.clone().detach()
-
                 Pe = self.PE.forward(idx=i)
-                feature_att = self.Att(filter_feature, IP_feature, memo2=CP_ema, embedding=Pe)
+                feature_att = self.Att(filter_feature, IP_score, memo2=CP_ema, embedding=Pe)
                 feature_att += people_feature.clone()
-
-                # print("this is the size of feature attention", feature_att.shape)
-                # print(feature_att.shape)
-                GCNQ2 = self.GCNsQ2[k]
-                feature = GCNQ2(feature_att)
-                # print("this  is the shape of feature",feature.shape)
-
-                # feature = self.GCNQ2(feature_att)
-                #feature = self.pooling(feature) 
-                # feature = self.final_projection(feature)
-                # if k == self.k_levels :
-                #     refined_pred = self.refinement(feature)
-                #     feature = torch.matmul(self.idct, refined_pred)
-                #     feature = feature.transpose(1, 2)
-
-                # print(feature.shape)    
+                GCN_decoder = self.GCNsQ2[k]
+                feature = GCN_decoder(feature_att)
                 if i == 0:
+                    level_Features = feature_att.unsqueeze(1).clone()       
+                    dct_out = feature.unsqueeze(1).clone()
+                    feature = torch.matmul(self.idct, feature)
+                    feature = feature.transpose(1, 2)
                     predic = feature.unsqueeze(1).clone()
                 else:
+                    level_Features = torch.cat([level_Features, feature_att.unsqueeze(1).clone()], 1)
+                    dct_out = torch.cat([dct_out, feature.unsqueeze(1).clone()], 1)
+                    feature = torch.matmul(self.idct, feature)
+                    feature = feature.transpose(1, 2)
                     predic = torch.cat([predic, feature.unsqueeze(1).clone()], 1)
-            # people_feature_all = predic.clone().detach()
-            people_feature_all = predic.clone().detach()
+            dct = dct_out
+            results_feat.append(level_Features)
+            results.append(predic.clone())   
 
-            if k < self.k_levels:
-                # if u want to make predic an output of 25 frames (output frames only)
-                # input = torch.cat([input[:,:,:,:49], predic], 3)
-                # input_ori = torch.cat([input[:,:,:,:49], torch.matmul(self.idct, predic).clone().detach()], 3)
-                
-                # if predic output is 75 frames 
-                # input = predic
-                input_ori = torch.matmul(self.idct, predic).clone().detach()
-        # print("hi",predic.shape)
-        # print(f"this is the predic shape {predic.shape}")
-        # print(f"this is the gt shape {gt.shape}")
+        # concatenated = torch.cat(results, dim=3)  # shape [B, T, D * N]
+        # predic = self.linear(concatenated)
+        if mode == "adaptive":
+            B, P, T, J= results[0].shape
+            device = results[0].device
+            M = self.k_levels
 
-        # print(predic.shape)
-        predic = torch.matmul(self.idct, predic)
-        predic = self.refinement(predic)
-        predic = predic.transpose(2, 3)
+            # if epoch > 30:
+            filtered_results = [r[:,:,self.opt.frame_in:,:] for r in results]
+            stacked_feats = torch.stack(filtered_results, dim=-1)
+            gt_expanded = gt.unsqueeze(-1)  # -> (B, P, T, J, 1)
+            gt_expanded = gt_expanded.transpose(2, 3)
+            print(stacked_feats.shape, gt_expanded.shape)
+            l2norm_error = torch.norm((stacked_feats - gt_expanded[:, :, self.opt.frame_in:, :,:]), dim=3) # -> (B, P, T, J, M)
 
 
-        loss = self.mix_loss(predic, gt) + self.w_cb * k_loss
 
-        # predic = predic[:,:,1:,:]
-        # print(predic.shape)
+            
+
+            attn_logits = self.attention_mlp(l2norm_error)  #(B,P,T, M)
+            attn_logits = attn_logits.view(B, P,self.opt.frame_out, M)
+            def gumbel_tau_schedule(epoch, total_epochs, min_tau=0.5, max_tau=2):
+                progress = epoch / total_epochs
+                tau = max_tau * (1 - progress) + min_tau * progress
+                return max(0.5,tau)
+
+            tau = gumbel_tau_schedule(epoch,80)
+            hard = False
+            # attn_weights = safe_gumbel_softmax(attn_logits, tau=tau, hard=hard, dim=-1)
+            # attn_weights = F.gumbel_softmax(attn_logits, tau=tau, hard=hard, dim=-1)  # (T, M)
+            attn_weights = F.softmax(attn_logits / tau, dim=-1)
+            # Stack predictions: (M, B, P, T, J)
+            # filtered_results = [r[:,:,self.opt.frame_in:,:] for r in results]
+            stacked = torch.stack(filtered_results, dim=0)
+
+            # Expand attn_weights: (M, B, P, T, J)
+            attn = attn_weights.permute(3,0,1,2).unsqueeze(-1) # M,B,P,T,1
+            # Multiply and sum: final shape (B, P, T, J)
+            fused = (attn * stacked).sum(dim=0)
+            # print(fused.shape)
+            predic = torch.cat([results[0][:,:,:self.opt.frame_in,:], fused], 2)
+
+            with torch.no_grad():
+                # probs = F.softmax(attn_logits, dim=-1)
+                max_idx = attn_weights.argmax(dim=-1)  # shows which level was chosen
+                print("Selected levels (frame, joint):", max_idx)  # shape: (T, J)
+                print("this is the mean of each level",max_idx.float().mean())
+                # print("True selected ", attn_weights)
+
+            mean_attn = attn_weights.mean(dim=(0, 1, 2))  # (M,)
+            print(mean_attn.shape)
+            uniform = torch.full_like(mean_attn, 1.0 / mean_attn.size(-1))
+            diversity_loss = F.kl_div(mean_attn.log(), uniform, reduction='batchmean')
+            entropy = -(attn_weights * torch.log(attn_weights + 1e-8)).sum(dim=-1).mean()  # scalar
+            print("d7k bgd")
+            print(0.01 * entropy, 0.01*diversity_loss)
+            loss = self.mix_loss(predic, gt) + self.w_cb * k_loss + 0.01 * entropy + 0.01*diversity_loss 
+ 
+        if mode == "static":
+            predic = torch.cat([results[0][:,:,:self.opt.frame_in+15,:],results[-1][:,:,self.opt.frame_in+15:,:]], 2)
+            #     for p in self.attention_mlp.parameters():
+            #         p.requires_grad = False
+            loss = self.mix_loss(predic, gt) + self.w_cb * k_loss 
+
+
+
+        # predic = torch.cat([results[0][:,:,:self.opt.frame_in,:], fused], 2)
+        
+
         if self.dataset == "Mocap" or self.dataset == "CHI3D" or self.dataset == "Wusi":
-            return predic, loss
+            return predic, loss , max_idx.float().mean()
         elif self.dataset == "Human3.6M":
             return predic[:, 0, :, :], loss
 
@@ -287,18 +282,10 @@ class IAFormer(nn.Module):
 
         gt = gt.transpose(2, 3)
         bs, np, sql, _ = gt.shape
-        # spacial_loss_pred = torch.mean(((gt[:, :, self.opt.frame_in:, :]-predic[:, :, self.opt.frame_in:, :])**2).sum(dim=-1))
-        # torch.mean(torch.norm((predic - gt), dim=3)) 
-        
-        
-        
 
-        # spacial_loss_pred = torch.mean((torch.norm((predic[:, :, 1:, :] - gt[:, :, self.opt.frame_in:, :]))))
         spacial_loss_pred = torch.mean(torch.norm((predic[:, :, self.opt.frame_in:, :] - gt[:, :, self.opt.frame_in:, :]), dim=3))
-        physics_loss_pred = self.physics_loss(predic, gt)
-        # recon_loss = nn.functional.l1_loss(predic[:, :,0,:], gt[:, :, 49, :])
-        spacial_loss_ori = torch.mean(((gt[:, :, :self.opt.frame_in, :]-predic[:, :, :self.opt.frame_in, :])**2).sum(dim=-1))
-        spacial_loss =  (spacial_loss_pred) + (spacial_loss_ori * 0.1) +(physics_loss_pred* 0.5) #recon_loss* 0.1 
+        spacial_loss_ori = torch.mean(torch.norm((predic[:, :, :self.opt.frame_in, :] - gt[:, :, :self.opt.frame_in, :]), dim=3))
+        spacial_loss = spacial_loss_pred + spacial_loss_ori * 0.1
 
         temporal_loss = 0
 
@@ -309,26 +296,13 @@ class IAFormer(nn.Module):
             tempo_pre = self.timecon(predic[:, idx_person, :, :].unsqueeze(1))
             tempo_ref = self.timecon(gt[:, idx_person, :, :].unsqueeze(1))
             
-            temporal_loss += torch.mean(((tempo_ref-tempo_pre)**2).sum(dim=-1))
+            temporal_loss += torch.mean(torch.norm(tempo_pre-tempo_ref, dim=3))
 
         loss = self.w_sp * spacial_loss + self.w_tp * temporal_loss
 
         return loss
 
 
-    def physics_loss(self,pred, gt):
-        """Enforce smooth movement by constraining velocity and acceleration."""
-        velocity_pred = pred[:,:, 1:,:] - pred[:,:, :-1,:]  # Velocity = ΔPosition
-        velocity_gt = gt[:,:, 1:,:] - gt[:,:, :-1,:]
-        acceleration_pred = velocity_pred[:,:, 1:,:] - velocity_pred[:,:, :-1,:]  # Acceleration = ΔVelocity
-        acceleration_gt = velocity_gt[:,:, 1:,:] - velocity_gt[:,:, :-1,:]
-
-        velocity_loss = torch.mean((velocity_pred - velocity_gt) ** 2)
-        acceleration_loss = torch.mean((acceleration_pred - acceleration_gt) ** 2)
-
-        return velocity_loss #+ 0.1 * acceleration_loss  # Weight acceleration loss less to avoid oversmoothing
-    
-    
     def get_dct_matrix(self, N):
         # Computes the discrete cosine transform (DCT) matrix and its inverse (IDCT)
         dct_m = np.eye(N)

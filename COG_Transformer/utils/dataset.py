@@ -14,17 +14,6 @@ class MPMotion(data.Dataset):
         self.concat_last = concat_last
             
     def __getitem__(self, index):
-        # input_seq=self.data[index][:,:self.in_len,:]     
-        # output size is all is max seq length
-       
-        #for ouput of size frame out        
-        # output_seq=self.data[index][:,self.in_len:self.max_len,:]
-        # if self.concat_last:
-        #     last_input=input_seq[:,-1:,:]
-        #     output_seq = np.concatenate([last_input, output_seq], axis=1)
-        # input_seq = input_seq.transpose(0, 2, 1)
-        # output_seq = output_seq.transpose(0, 2, 1) 
-
         input_seq=self.data[index][:,:self.in_len,:]     
         output_seq=self.data[index][:,:self.max_len,:]
         pad_idx = np.repeat([self.in_len - 1], self.diff)
