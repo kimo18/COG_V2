@@ -7,3 +7,8 @@ social_2/
 Social-CH/checkpoint
 Workspace
 ../.vscode-server/
+COG_Transformer/best_model_checkpoint_AVG.pth
+COG_Transformer/best_model_checkpoint_onlychoose_least.pth
+COG_Transformer/best_model_checkpoint_SoftMAX.pth
+COG_Transformer/best_model_checkpoint.pth
+COG_Transformer/discrim_checkpoint_onlychoose_least.pth
