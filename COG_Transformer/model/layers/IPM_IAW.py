@@ -24,14 +24,33 @@ class AP(nn.Module):
             nn.Dropout(0.1)
         )
 
-    def forward(self, x):
+    def forward(self, x, Viz = False):
 
-        motion_oldall = torch.cat([x[:, :, 0].unsqueeze(2), x[:, :, :self.opt.frame_in-1]], dim=2)
+        if not Viz:
+            motion_oldall = torch.cat([x[:, :, 0].unsqueeze(2), x[:, :, :self.opt.frame_in-1]], dim=2)
 
-        Change = x[:, :, :self.opt.frame_in] - motion_oldall
+            Change = x[:, :, :self.opt.frame_in] - motion_oldall
 
-        feature_am, feature_score = self.AP_att(Change)
+            feature_am, feature_score = self.AP_att(Change)
 
-        AP_score = self.AP_FC(feature_am)
+            AP_score = self.AP_FC(feature_am)
+            return AP_score, Change
+        else:
+            persons = x.shape[1]
+            changes = []
+            AP_scores = []
+            for i in range(persons):
+                input = x[:,i,:,:]
+                motion_oldall = torch.cat([input[:, :, 0].unsqueeze(2), input[:, :, :self.opt.frame_in-1]], dim=2)
+                Change = input[:, :, :self.opt.frame_in] - motion_oldall
+                feature_am, feature_score = self.AP_att(Change)
+                AP_score = self.AP_FC(feature_am)
+                if i ==0 :
+                    changes = Change.unsqueeze(1)
+                    AP_scores  = AP_score.unsqueeze(1)
+                else:
+                    changes = torch.cat([changes,Change.unsqueeze(1)],1)
+                    AP_scores = torch.cat([AP_scores,AP_score.unsqueeze(1)],1)
+            return AP_scores, changes
 
-        return AP_score, Change
+

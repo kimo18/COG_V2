@@ -31,11 +31,13 @@ os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 
 
 def main(opt,wandb_args):
+    np.random.seed(1234567890)
     torch.manual_seed(1234567890)
     torch.manual_seed(1234567890)   
     torch.cuda.manual_seed(1234567890) 
     torch.backends.cudnn.deterministic = True
-
+    torch.cuda.set_device(device=0)
+    torch.autograd.set_detect_anomaly(True)
     select_cuda = opt.cudaid
     torch.cuda.set_device(device=select_cuda)
     print("The using GPU is device {0}".format(select_cuda))
@@ -51,7 +53,7 @@ def main(opt,wandb_args):
         wandb.init(
                 project="COG_Transformer",
                 config=wandb_args,
-                name="IAFormer"
+                name="IAFormer_wusi_test"
         )
 
     elif opt.mode == 'test':
@@ -268,8 +270,8 @@ def eval(opt, net_pred, data_loader, nb_kpts, epo):
         data_gt = data_gt.reshape(opt.batch_size, num_per, opt.seq_len, nb_kpts, 3)
         data_out = data_out.reshape(opt.batch_size, num_per, opt.seq_len, nb_kpts, 3)
         for j in eval_frame:
-            mpjpe=torch.sqrt(((data_gt[:,:, opt.frame_in:opt.frame_in+j, :, :] - data_out[:,:, opt.frame_in:opt.frame_in+j, :, :]) ** 2).sum(dim=-1)).mean(dim=-1).mean(dim=-1).mean(dim = -1).sum(dim = -1).cpu().data.numpy().tolist()
-            aligned_loss=torch.sqrt(((data_gt[:,:, opt.frame_in:opt.frame_in+j, :, :] - data_gt[:,:, opt.frame_in:opt.frame_in+j, 0:1, :] - data_out[:,:, opt.frame_in:opt.frame_in+j, :, :] + data_out[:,:, opt.frame_in:opt.frame_in+j, 0:1, :]) ** 2).sum(dim=-1)).mean(dim=-1).mean(dim=-1).mean(dim = -1).sum(dim = -1).cpu().data.numpy().tolist()           
+            mpjpe=torch.sqrt(((data_gt[:,:, opt.frame_in:opt.frame_in+j, :, :] - data_out[:,:, opt.frame_in:opt.frame_in+j, :, :]) ** 2).sum(dim=-1)).mean(dim=-1).mean(dim=-1).mean(dim = -1).mean(dim = -1).cpu().data.numpy().tolist()
+            aligned_loss=torch.sqrt(((data_gt[:,:, opt.frame_in:opt.frame_in+j, :, :] - data_gt[:,:, opt.frame_in:opt.frame_in+j, 0:1, :] - data_out[:,:, opt.frame_in:opt.frame_in+j, :, :] + data_out[:,:, opt.frame_in:opt.frame_in+j, 0:1, :]) ** 2).sum(dim=-1)).mean(dim=-1).mean(dim=-1).mean(dim = -1).mean(dim = -1).cpu().data.numpy().tolist()           
             # root_loss=torch.sqrt(((prediction_1[:, :j, 0, :] - gt_1[:, :j, 0, :]) ** 2).sum(dim=-1)).mean(dim=-1).mean(dim=-1).cpu().data.numpy().tolist()
             if j not in loss_list1.keys():
                 loss_list1[j] = mpjpe
@@ -280,37 +282,38 @@ def eval(opt, net_pred, data_loader, nb_kpts, epo):
                 aligned_loss_list1[j] += aligned_loss
             # root_loss_list1[j].append(np.mean(root_loss))
 
-        stats = {}
-        for j in eval_frame:
-            e1, e2 = loss_list1[j]/n*1000, aligned_loss_list1[j]/n*1000
-            prefix = 'val/frame%d/' % j
-            stats[prefix + 'err'] = e1
-            stats[prefix + 'err aligned'] = e2
-            # stats[prefix + 'err root'] = e3
-        if epo >= 0:
-            stats['epoch'] = epo
-            wandb.log(stats)
-        else:
-            pprint(stats)
-        return e1, e2
+    stats = {}
+    no_batches = n/opt.batch_size
+    for j in eval_frame:
+        e1, e2 = loss_list1[j]/no_batches*1000, aligned_loss_list1[j]/no_batches*1000
+        prefix = 'val/frame%d/' % j
+        stats[prefix + 'err'] = e1
+        stats[prefix + 'err aligned'] = e2
+        # stats[prefix + 'err root'] = e3
+    if epo >= 0:
+        stats['epoch'] = epo
+        wandb.log(stats)
+    else:
+        pprint(stats)
+    return e1, e2
 
 
-        # print(data_out.shape, data_gt.shape)
-        data_gt = data_gt.reshape(opt.batch_size, num_per, opt.seq_len, nb_kpts, 3)
-        data_out = data_out.reshape(opt.batch_size, num_per, opt.seq_len, nb_kpts, 3)
-        tmp_joi = torch.sum(torch.mean(torch.mean(torch.norm(data_gt - data_out, dim=4), dim=3), dim=1), dim=0)
-        # print(tmp_joi)
-        mpjpe_joi += tmp_joi.cpu().data.numpy()
+    # print(data_out.shape, data_gt.shape)
+    data_gt = data_gt.reshape(opt.batch_size, num_per, opt.seq_len, nb_kpts, 3)
+    data_out = data_out.reshape(opt.batch_size, num_per, opt.seq_len, nb_kpts, 3)
+    tmp_joi = torch.sum(torch.mean(torch.mean(torch.norm(data_gt - data_out, dim=4), dim=3), dim=1), dim=0)
+    # print(tmp_joi)
+    mpjpe_joi += tmp_joi.cpu().data.numpy()
 
-        tmp_ape_joi = APE(data_out[:, :, opt.frame_in:, :, :], data_gt[:, :, opt.frame_in:, :, :], [4, 9, 14, 19, 24])
-        ape_joi += tmp_ape_joi#.data.numpy()
+    tmp_ape_joi = APE(data_out[:, :, opt.frame_in:, :, :], data_gt[:, :, opt.frame_in:, :, :], [4, 9, 14, 19, 24])
+    ape_joi += tmp_ape_joi#.data.numpy()
 
-        data_vim_gt = data_gt[:, :, opt.frame_in:, :, :].transpose(2, 1)
-        data_vim_gt = data_vim_gt.reshape(opt.batch_size, opt.seq_len, -1, 3)
-        data_vim_pred = data_out[:, :, opt.frame_in:, :, :].transpose(2, 1)
-        data_vim_pred = data_vim_pred.reshape(opt.batch_size, opt.seq_len, -1, 3)
-        tmp_vim_joi = batch_VIM(data_vim_gt.cpu().data.numpy(), data_vim_pred.cpu().data.numpy(), [4, 9, 14, 19, 24])
-        vim_joi += tmp_vim_joi#.data.numpy()
+    data_vim_gt = data_gt[:, :, opt.frame_in:, :, :].transpose(2, 1)
+    data_vim_gt = data_vim_gt.reshape(opt.batch_size, opt.seq_len, -1, 3)
+    data_vim_pred = data_out[:, :, opt.frame_in:, :, :].transpose(2, 1)
+    data_vim_pred = data_vim_pred.reshape(opt.batch_size, opt.seq_len, -1, 3)
+    tmp_vim_joi = batch_VIM(data_vim_gt.cpu().data.numpy(), data_vim_pred.cpu().data.numpy(), [4, 9, 14, 19, 24])
+    vim_joi += tmp_vim_joi#.data.numpy()
 
     mpjpe_joi = mpjpe_joi/n * 1000  # n = testing dataset length
     ape_joi = ape_joi/n * 1000 * opt.batch_size

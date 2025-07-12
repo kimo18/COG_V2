@@ -1,0 +1,6 @@
+Listening on 127.0.0.1:43313
+[2025-04-09 19:03:27] info Disposed of connection to running server.
+[2025-04-09 19:03:27] info Checking /scratch/users/badreldeen/.vscode-server/cli/servers/Stable-4437686ffebaf200fa4a6e6e67f735f3edf24ada/log.txt and /scratch/users/badreldeen/.vscode-server/cli/servers/Stable-4437686ffebaf200fa4a6e6e67f735f3edf24ada/pid.txt for a running server...
+[2025-04-09 19:03:27] info Starting server...
+[2025-04-09 19:03:27] info Server started
+[2025-04-10 00:04:15] info Disposed of connection to running server.

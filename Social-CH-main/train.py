@@ -112,7 +112,7 @@ args = EasyDict(args)
 set_random_seed(args.seed)
 
 train_data = "../Data/train_3_75_mocap_umpm.npy"
-test_data = "../Data/test_3_75_mocap_umpm.npy"
+test_data = "../Data/mix2_10persons.npy"
 dataset = MPMotion(train_data, concat_last=True)
 test_dataset = MPMotion(test_data, concat_last=True)
 
@@ -131,7 +131,7 @@ if opts.eval:
 
 if opts.train:
     wandb.init(
-            project="COG_Transformer",
+            project="COG_Transformer_Mix2",
             config=args,
             name="Social-CH lvl 3"
     )
@@ -180,10 +180,13 @@ if opts.train:
         for j, data in tqdm(enumerate(dataloader)):
             
             use = None
+
             input_seq, output_seq = data 
             B = input_seq.shape[0]
 
             input_seq = torch.tensor(input_seq,dtype=torch.float32).to(device) 
+            print("kofta",input_seq.shape)
+
             output_seq = torch.tensor(output_seq,dtype=torch.float32).to(device) 
             input_ = input_seq.view(-1,50,input_seq.shape[-1]) 
             output_ = output_seq.view(output_seq.shape[0]*output_seq.shape[1],-1, input_seq.shape[-1])

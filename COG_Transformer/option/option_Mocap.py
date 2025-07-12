@@ -22,30 +22,33 @@ class Options:
         self.parser.add_argument('--expname', type=str, default='CMU_MoCap_50_25', help='name of exp in wandb')
         "---codebook option---"
         self.parser.add_argument('--codebook_size', type=int, default=256, help='size of codebook(IKS)')
-        self.parser.add_argument('--latent_dim', type=int, default=75, help='vector dim in codebook(IKS)')
+        self.parser.add_argument('--latent_dim', type=int, default=50, help='vector dim in codebook(IKS)')
         self.parser.add_argument('--beta', type=int, default=0.5, help='hyperpara in codebook(IKS), degree of iteration')
 
         "---data option---"
-        self.parser.add_argument('--train_data', type=str, default='../Data/train_3_75_mocap_umpm.npy', help='training data location')
-        self.parser.add_argument('--test_data', type=str, default='../Data/test_3_75_mocap_umpm.npy', help='test data location')
+        self.parser.add_argument('--train_data', type=str, default='../Data/training.npy', help='training data location')
+        self.parser.add_argument('--test_data', type=str, default='../Data/testing.npy', help='test data location')
 
         "---hyperpara option---"
         self.parser.add_argument('--seed', type=float, default=1234567890, help='seed generation number')
         self.parser.add_argument('--drop_out', type=float, default=0.1, help='drop out probability')
         self.parser.add_argument('--d_model', type=int, default=256, help='dimension of model')
+        self.parser.add_argument('--d_inner_g' , type=int, default = 1024, help = 'innerdimension of generator')
+        self.parser.add_argument('--d_inner_d' , type=int, default = 1024, help = 'innerdimension of discrimenator')
+        self.parser.add_argument('--d_hidden' , type=int, default = 512, help = 'innerdimension of discrimenator')
         self.parser.add_argument('--epochs', type=int, default=80)
-        self.parser.add_argument('--batch_size', type=int, default=96)
+        self.parser.add_argument('--batch_size', type=int, default=64)
         self.parser.add_argument('--lr_now', type=float, default=0.01)
         self.parser.add_argument('--lr_decay_rate', type=float, default=0.98)
         self.parser.add_argument('--max_norm', type=float, default=10000)
         self.parser.add_argument('--in_features', type=int, default=45, help='dim of input feature, n x j')
-        self.parser.add_argument('--frame_in', type=int, default=50,
+        self.parser.add_argument('--frame_in', type=int, default=25,
                                  help='input frame number used in dataloader')
         self.parser.add_argument('--frame_out', type=int, default=25,
                                  help='output frame number used in dataloader')
-        self.parser.add_argument('--seq_len', type=int, default=75,
+        self.parser.add_argument('--seq_len', type=int, default=50,
                                  help='frame number each sample')
-        self.parser.add_argument('--k_level', type=int, default=1,
+        self.parser.add_argument('--k_level', type=int, default=2,
                                  help='frame number each sample')
 
         "---size option of module---"
@@ -60,6 +63,9 @@ class Options:
                                  help='check the model with corresponding epoch')
         self.parser.add_argument('--save_results', type=bool, default=3,
                                  help='whether to save result')
+        self.parser.add_argument('--wandb_proj_name', type=str, default="COG_Transformer_Discrimin}",
+        help='proj name of wandb')
+                                 
         
 
         "---Parameter sensitivity experiment---"

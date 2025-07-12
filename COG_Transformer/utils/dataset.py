@@ -3,7 +3,7 @@ import torch
 import numpy as np
 
 class MPMotion(data.Dataset):
-    def __init__(self, data_path, in_len = 50, max_len = 75, concat_last = False, mode = "Train"):
+    def __init__(self, data_path, in_len = 25, max_len = 50, concat_last = False, mode = "Train"):
         print(f'>>> DATA loading from path: {data_path}>>>')
         self.data = np.load(data_path, allow_pickle=True)
         print(f'>>> {mode}ing dataset Shape: {self.data.shape}') #Sequence,#person,#Frame,#keypoints
@@ -11,7 +11,7 @@ class MPMotion(data.Dataset):
         self.max_len = max_len
         self.in_len = in_len
         self.diff = max_len-in_len
-        self.concat_last = concat_last
+        # self.concat_last = concat_last
             
     def __getitem__(self, index):
         input_seq=self.data[index][:,:self.in_len,:]     

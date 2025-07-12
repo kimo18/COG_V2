@@ -1,0 +1,167 @@
+2025-04-29 20:42:51.382 [info] Extension host with pid 112067 started
+2025-04-29 20:42:51.389 [info] Lock '/scratch/users/badreldeen/.vscode-server/data/User/workspaceStorage/1bd1f1e401fc8832d883fab89892f06c/vscode.lock': Lock acquired.
+2025-04-29 20:42:52.788 [info] ExtensionService#_doActivateExtension vscode.git-base, startup: false, activationEvent: '*', root cause: vscode.git
+2025-04-29 20:42:52.791 [info] ExtensionService#_doActivateExtension vscode.emmet, startup: false, activationEvent: 'onLanguage'
+2025-04-29 20:42:53.970 [info] ExtensionService#_doActivateExtension vscode.git, startup: false, activationEvent: '*'
+2025-04-29 20:42:53.970 [info] ExtensionService#_doActivateExtension vscode.github, startup: false, activationEvent: '*'
+2025-04-29 20:42:54.448 [info] Eager extensions activated
+2025-04-29 20:42:54.449 [info] ExtensionService#_doActivateExtension vscode.debug-auto-launch, startup: false, activationEvent: 'onStartupFinished'
+2025-04-29 20:42:54.449 [info] ExtensionService#_doActivateExtension vscode.merge-conflict, startup: false, activationEvent: 'onStartupFinished'
+2025-04-29 20:42:54.736 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6586
+2025-04-29 20:42:55.924 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6588
+2025-04-29 20:43:00.364 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6581
+2025-04-29 20:43:15.179 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6581
+2025-04-29 20:43:20.440 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6581
+2025-04-29 20:43:33.780 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:43:39.037 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:43:44.242 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:48:58.060 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:49:03.318 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:49:08.937 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:49:14.197 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:49:19.430 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:49:24.678 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:49:29.934 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:49:35.145 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:49:40.401 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:49:45.655 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:49:50.917 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:49:56.170 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:50:01.428 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:50:06.649 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:50:11.905 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:50:17.160 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:50:22.422 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:50:27.684 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:50:34.138 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:50:39.394 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:50:44.633 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:50:50.235 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:50:55.452 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:51:00.954 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:51:06.203 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:51:11.466 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:51:16.717 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:51:21.974 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:51:27.238 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:51:32.490 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:51:37.742 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:51:43.001 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:51:48.262 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:51:53.520 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:51:58.780 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:52:04.040 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:52:09.292 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:52:14.553 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:52:20.052 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:52:25.312 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:52:30.573 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:52:35.785 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:52:41.038 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:52:46.296 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:52:51.548 [warning] [Decorations] CAPPING events from decorations provider vscode.git 6582
+2025-04-29 20:52:55.612 [info] Extension host terminating: received terminate message from renderer
+2025-04-29 20:52:55.613 [info] Lock '/scratch/users/badreldeen/.vscode-server/data/User/workspaceStorage/1bd1f1e401fc8832d883fab89892f06c/vscode.lock': Marking the lockfile as scheduled to be released in 6000 ms.
+2025-04-29 20:52:55.693 [error] Canceled: Canceled
+	at new HR (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:29:156308)
+	at i4.U (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:29:160919)
+	at s.<computed>.n.charCodeAt.s.<computed> (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:29:158413)
+	at vw.g (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:111:40983)
+	at vw.executeCommand (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:111:40487)
+	at r.registerCommand.description (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:111:39817)
+	at vw.h (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:111:41503)
+	at vw.g (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:111:40580)
+	at vw.executeCommand (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:111:40487)
+	at Object.executeCommand (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:173:30346)
+	at Ah.L [as value] (/scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/extensions/git/dist/main.js:2:511809)
+	at P.B (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:27:2375)
+	at P.C (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:27:2445)
+	at P.fire (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:27:2662)
+	at Object.g [as dispose] (/scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/extensions/git/dist/main.js:2:534449)
+	at /scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/extensions/git/dist/main.js:2:540767
+	at Array.forEach (<anonymous>)
+	at b.dispose (/scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/extensions/git/dist/main.js:2:540753)
+	at iv.<anonymous> (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:107:8922)
+	at iv.dispose (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:107:9018)
+	at iv.<anonymous> (/scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/extensions/git/dist/main.js:2:514293)
+	at iv.dispose (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:107:9018)
+	at pi (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:25:701)
+	at file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:115:14994
+	at file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:25:1011
+	at Object.dispose (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:8:705)
+	at vV.eb (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:115:11921)
+	at file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:115:9876
+	at Array.map (<anonymous>)
+	at vV.$ (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:115:9864)
+	at vV.terminate (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:115:10107)
+	at oP.terminate (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:116:1434)
+	at es (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:197:5701)
+	at Ah.value (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:197:3862)
+	at P.B (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:27:2375)
+	at P.fire (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:27:2593)
+	at Jn.fire (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:29:9459)
+	at Km.A (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:29:12575)
+	at Ah.value (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:29:10995)
+	at P.B (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:27:2375)
+	at P.fire (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:27:2593)
+	at M6.acceptChunk (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:29:7942)
+	at file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:29:7228
+	at Socket.t (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:29:15252)
+	at Socket.emit (node:events:518:28)
+	at addChunk (node:internal/streams/readable:561:12)
+	at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+	at Readable.push (node:internal/streams/readable:392:5)
+	at Pipe.onStreamRead (node:internal/stream_base_commons:191:23) setContext undefined
+2025-04-29 20:52:55.694 [error] Canceled: Canceled
+	at new HR (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:29:156308)
+	at i4.U (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:29:160919)
+	at s.<computed>.n.charCodeAt.s.<computed> (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:29:158413)
+	at vw.g (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:111:40983)
+	at vw.executeCommand (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:111:40487)
+	at r.registerCommand.description (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:111:39817)
+	at vw.h (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:111:41503)
+	at vw.g (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:111:40580)
+	at vw.executeCommand (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:111:40487)
+	at Object.executeCommand (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:173:30346)
+	at set hasGitHubRepositories [as hasGitHubRepositories] (/scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/extensions/github/dist/extension.js:2:217805)
+	at /scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/extensions/github/dist/extension.js:2:218764
+	at Ah.value (/scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/extensions/git/dist/main.js:2:631688)
+	at P.B (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:27:2375)
+	at P.C (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:27:2445)
+	at P.fire (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:27:2662)
+	at Object.g [as dispose] (/scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/extensions/git/dist/main.js:2:534449)
+	at /scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/extensions/git/dist/main.js:2:540767
+	at Array.forEach (<anonymous>)
+	at b.dispose (/scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/extensions/git/dist/main.js:2:540753)
+	at iv.<anonymous> (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:107:8922)
+	at iv.dispose (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:107:9018)
+	at iv.<anonymous> (/scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/extensions/git/dist/main.js:2:514293)
+	at iv.dispose (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:107:9018)
+	at pi (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:25:701)
+	at file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:115:14994
+	at file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:25:1011
+	at Object.dispose (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:8:705)
+	at vV.eb (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:115:11921)
+	at file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:115:9876
+	at Array.map (<anonymous>)
+	at vV.$ (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:115:9864)
+	at vV.terminate (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:115:10107)
+	at oP.terminate (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:116:1434)
+	at es (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:197:5701)
+	at Ah.value (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:197:3862)
+	at P.B (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:27:2375)
+	at P.fire (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:27:2593)
+	at Jn.fire (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:29:9459)
+	at Km.A (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:29:12575)
+	at Ah.value (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:29:10995)
+	at P.B (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:27:2375)
+	at P.fire (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:27:2593)
+	at M6.acceptChunk (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:29:7942)
+	at file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:29:7228
+	at Socket.t (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/vs/workbench/api/node/extensionHostProcess.js:29:15252)
+	at Socket.emit (node:events:518:28)
+	at addChunk (node:internal/streams/readable:561:12)
+	at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+	at Readable.push (node:internal/streams/readable:392:5)
+	at Pipe.onStreamRead (node:internal/stream_base_commons:191:23) setContext undefined
+2025-04-29 20:52:55.695 [info] Extension host with pid 112067 exiting with code 0

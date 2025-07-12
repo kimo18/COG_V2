@@ -149,7 +149,7 @@ class GCN(nn.Module):
         if not is_output:
             y = self.gc7(y)
             y = y + x
-        # else :
-        #     y = self.gcout(y)
+        else :
+            y = y
         #     y = y+x[:,:,49:]            
         return y

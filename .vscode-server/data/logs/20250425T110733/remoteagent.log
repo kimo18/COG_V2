@@ -1,0 +1,25 @@
+2025-04-25 11:07:33.608 [info] 
+
+
+
+
+2025-04-25 11:07:33.622 [info] Extension host agent started.
+2025-04-25 11:07:33.809 [info] [<unknown>][1005fc93][ManagementConnection] New connection established.
+2025-04-25 11:07:33.811 [info] [<unknown>][a6308396][ExtensionHostConnection] New connection established.
+2025-04-25 11:07:34.061 [info] [<unknown>][a6308396][ExtensionHostConnection] <652330> Launched Extension Host Process.
+2025-04-25 11:12:33.623 [info] New EH opened, aborting shutdown
+2025-04-25 12:07:45.348 [info] [<unknown>][1005fc93][ManagementConnection] The client has disconnected, will wait for reconnection 3h before disposing...
+2025-04-25 12:07:45.359 [error] Error: Unexpected SIGPIPE
+    at process.<anonymous> (file:///scratch/users/badreldeen/.vscode-server/cli/servers/Stable-17baf841131aa23349f217ca7c570c76ee87b957/server/out/server-main.js:183:1060)
+    at process.emit (node:events:530:35)
+2025-04-25 12:19:00.949 [info] [<unknown>][1005fc93][ManagementConnection] Another client has connected, will shorten the wait for reconnection 5m before disposing...
+2025-04-25 12:19:00.951 [info] [<unknown>][1432652c][ManagementConnection] New connection established.
+2025-04-25 12:19:00.954 [info] [<unknown>][d0f6944e][ExtensionHostConnection] New connection established.
+2025-04-25 12:19:00.961 [info] [<unknown>][d0f6944e][ExtensionHostConnection] <711236> Launched Extension Host Process.
+2025-04-25 12:24:00.993 [info] [<unknown>][1005fc93][ManagementConnection] The reconnection short grace time of 5m has expired, so the connection will be disposed.
+2025-04-25 12:24:01.332 [info] [<unknown>][a6308396][ExtensionHostConnection] <652330> Extension Host Process exited with code: 0, signal: null.
+2025-04-25 13:08:02.113 [info] [<unknown>][1432652c][ManagementConnection] The client has disconnected, will wait for reconnection 3h before disposing...
+2025-04-25 16:07:42.327 [info] [<unknown>][d0f6944e][ExtensionHostConnection] <711236> Extension Host Process exited with code: 0, signal: null.
+2025-04-25 16:07:42.329 [info] Last EH closed, waiting before shutting down
+2025-04-25 16:08:07.026 [info] [<unknown>][1432652c][ManagementConnection] The reconnection grace time of 3h has expired, so the connection will be disposed.
+2025-04-25 16:12:42.330 [info] Last EH closed, shutting down

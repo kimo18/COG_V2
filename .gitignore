@@ -5,4 +5,5 @@ social_2/
 **/model/checkpoint/
 **/model/codebook/
 Social-CH/checkpoint
-
+Workspace
+../.vscode-server/
