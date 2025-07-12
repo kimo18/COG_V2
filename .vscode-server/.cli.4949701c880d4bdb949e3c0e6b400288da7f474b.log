@@ -1,6 +1,0 @@
-Listening on 127.0.0.1:36383
-[2025-04-16 08:36:43] info Disposed of connection to running server.
-[2025-04-16 08:36:43] info Checking /scratch/users/badreldeen/.vscode-server/cli/servers/Stable-4949701c880d4bdb949e3c0e6b400288da7f474b/log.txt and /scratch/users/badreldeen/.vscode-server/cli/servers/Stable-4949701c880d4bdb949e3c0e6b400288da7f474b/pid.txt for a running server...
-[2025-04-16 08:36:43] info Starting server...
-[2025-04-16 08:36:43] info Server started
-[2025-04-16 10:12:14] info Disposed of connection to running server.
